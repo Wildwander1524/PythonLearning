@@ -331,10 +331,14 @@ These are now the permanent operating rules for this study plan. They apply ever
    - plus any newly-hot direction the week's news surfaces.
    The refresh lands as the **Friday "Weekly AI Industry Digest #N"** entry and updates the next
    week's S4 cells.
-   - ⚠️ *Automation note:* I don't run autonomously between turns, so the weekly refresh happens when
-     you check in (ideally each Friday/weekend). If you want it to fire on a fixed schedule without
-     you prompting, say the word and I'll set up a scheduled routine (`/schedule`) to generate the
-     digest automatically.
+   - ✅ *Automation (live):* A scheduled cloud routine now generates the digest automatically every
+     **Friday 09:00 Asia/Shanghai** and pushes it to this repo.
+     - Routine ID: `trig_01DCx7PTmKXrwbJnUu5Xr9Ym` · Manage: https://claude.ai/code/routines/trig_01DCx7PTmKXrwbJnUu5Xr9Ym
+     - First run: **Fri 2026-06-19**. The cloud agent appends a numbered `### Digest #N` (see the
+       *Weekly AI Industry Digests* section it will create) and commits `update: weekly AI industry digest #N`.
+     - ⚠️ **Prerequisite:** the cloud agent needs GitHub access to this repo. If digests don't appear,
+       connect GitHub via `/web-setup` or install the Claude GitHub App, then re-run the routine from
+       the link above.
 
 3. **Record discipline.** This file stays the single source of truth for the plan + progress. I keep
    §3–§5 aligned with reality as your pace shifts, and I never silently drop a subject — deferrals are
