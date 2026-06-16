@@ -291,7 +291,7 @@ train/val/test, scikit-learn workflow.
 ### Week-level status
 | Week | Theme | Status | Notes |
 |------|-------|--------|-------|
-| 1 | Python OOP + LA I | 🔄 | D1 done (9/10 tests); D2 materials issued |
+| 1 | Python OOP + LA I | 🔄 | D1 done (9/10 tests); D2–D6 materials + Digest #1 issued |
 | 2 | NumPy + LA II/Calc I | ☐ | |
 | 3 | Pandas + Calc II/Prob I | ☐ | |
 | 4 | MATLAB + C++ I + Discrete I | ☐ | |
