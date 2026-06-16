@@ -5,7 +5,7 @@
 - **Geography:** Phase 1 — China first-tier cities (Beijing / Shanghai / Guangzhou / Shenzhen); Phase 2 (long-term) — Germany, related field
 - **Plan window:** 2026-06-16 → 2026-09-12 (13 weeks; Week 1 starts Monday 2026-06-16)
 - **Cadence:** 6 days/week (Mon–Sat), Sunday off. **7 h theory + 3 h homework = 10 h/day**
-- **Created:** 2026-06-15  | **Last updated:** 2026-06-15  | **Status:** 🟢 Active — Week 0 (pre-start)
+- **Created:** 2026-06-15  | **Last updated:** 2026-06-16  | **Status:** 🟢 Active — Week 1 in progress (D1 done)
 
 > This file is BOTH the study plan AND the live progress record. As you complete exercises,
 > send them to me and I update the tracking table + completion log below. See **§7 Default
@@ -291,7 +291,7 @@ train/val/test, scikit-learn workflow.
 ### Week-level status
 | Week | Theme | Status | Notes |
 |------|-------|--------|-------|
-| 1 | Python OOP + LA I | ☐ | starts 06-16 |
+| 1 | Python OOP + LA I | 🔄 | D1 done (9/10 tests); D2 materials issued |
 | 2 | NumPy + LA II/Calc I | ☐ | |
 | 3 | Pandas + Calc II/Prob I | ☐ | |
 | 4 | MATLAB + C++ I + Discrete I | ☐ | |
@@ -308,6 +308,7 @@ train/val/test, scikit-learn workflow.
 ### Completion log (newest first)
 *(Each time you send completed exercises, I append a dated entry here: what you did, what was
 correct, what to fix, and any pace adjustment.)*
+- **2026-06-16** — **W1 D1 (BankAccount): 9/10 tests pass.** ✅ Correct: encapsulation (read-only `balance` property, no setter), validation on all 4 invalid cases, copy-on-read `history()`, class-attribute counter via `BankAccount.account_count`. 🔧 To fix: implement tested-but-missing `transfer()` (→ 10/10); use `list` + `.append()` for history (not tuple `+=`); simplify to `amount <= 0`; remove dead `pass` after `return`; `:.2f` in `__str__`. Full review → `week01/day01_bankaccount/REVIEW.md`. Pace: on track. Next → D2 inheritance/ABC (materials in `week01/day02_inheritance/LEARNING.md` + `HOMEWORK.md`).
 - **2026-06-15** — Plan created and saved as progress record. Pre-start (Week 0). Next: begin Week 1 D1 on Mon 06-16.
 
 ---
