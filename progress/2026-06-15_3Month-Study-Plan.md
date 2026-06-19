@@ -308,6 +308,13 @@ train/val/test, scikit-learn workflow.
 ### Completion log (newest first)
 *(Each time you send completed exercises, I append a dated entry here: what you did, what was
 correct, what to fix, and any pace adjustment.)*
+- **2026-06-18** — **Week-1 materials redesigned to the `/teach` standard** (user request). Built the
+  week shell (`MISSION.md` / `RESOURCES.md` / `learning-records/` / `README.md`) + all 6 days ×
+  `LESSON`+`HOMEWORK`+`RECALL`+`SOLUTIONS`, calibrated to the D1–D2 submissions and grounded in
+  Fluent Python / CS61A / 3B1B / MIT 18.06 / *Make It Stick*. Added retrieval practice + a
+  spaced-review map. Began EN-ZH bilingual `*.bilingual.md` generation via DeepSeek (all four file
+  types, separate files). Recorded the format + bilingual workflow as canonical (new standing rules
+  §7.5–6). Detail → `E:\Code\ClaudeCode_Context\2026-06-18_Week1-Redesign.md`.
 - **2026-06-16** — **W1 D1 (BankAccount): 9/10 tests pass.** ✅ Correct: encapsulation (read-only `balance` property, no setter), validation on all 4 invalid cases, copy-on-read `history()`, class-attribute counter via `BankAccount.account_count`. 🔧 To fix: implement tested-but-missing `transfer()` (→ 10/10); use `list` + `.append()` for history (not tuple `+=`); simplify to `amount <= 0`; remove dead `pass` after `return`; `:.2f` in `__str__`. Full review → `week01/day01_bankaccount/REVIEW.md`. Pace: on track. Next → D2 inheritance/ABC (materials in `week01/day02_inheritance/LEARNING.md` + `HOMEWORK.md`).
 - **2026-06-15** — Plan created and saved as progress record. Pre-start (Week 0). Next: begin Week 1 D1 on Mon 06-16.
 
@@ -347,6 +354,23 @@ These are now the permanent operating rules for this study plan. They apply ever
 
 4. **Honesty about pace.** 10 h/day × 6 days is intense. If reality diverges, I'll propose a realistic
    re-plan (e.g., stretch to 16 weeks) rather than pretend the original fits.
+
+5. **`/teach` lesson-format standard (adopted Week 1, 2026-06-18).** Every study day is authored as a
+   **`/teach` workspace**, not flat notes:
+   - week-level **`MISSION.md`** (Bloom-tagged objectives + the learner's *ability boundary* + a
+     mastery bar + a **Spaced-Review Map**), **`RESOURCES.md`** (authoritative sources — e.g. Fluent
+     Python, CS61A, 3Blue1Brown, MIT 18.06, primary papers), and **`learning-records/`** (per-session
+     memory that powers spaced repetition);
+   - per day **`LESSON.md`** + **`HOMEWORK.md`** + **`RECALL.md`** (retrieval-practice quiz) +
+     **`SOLUTIONS.md`**.
+   - Pedagogy spine = **retrieval practice + spaced/interleaved review + desirable difficulties**
+     (*Make It Stick* / Bjork). Homework is **calibrated to the learner's demonstrated growth edges**.
+
+6. **Bilingual workflow.** Author the **complete English** materials first, then pass each through
+   **DeepSeek** to produce EN-ZH **`*.bilingual.md`** files *alongside* the English originals — for
+   **all four** file types (LESSON/HOMEWORK/RECALL/SOLUTIONS). Superseded drafts are deleted. This
+   assumes the **Markdown** teaching approach; for any **other format** (e.g. interactive HTML via
+   `/teach`), confirm the choice first.
 
 ---
 

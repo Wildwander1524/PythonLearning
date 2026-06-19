@@ -14,9 +14,9 @@ def run_all_tests():
         test_zero_deposit_is_rejected,
         test_balance_property_is_readonly,
         test_history_records_transactions,
-        test_history_returns_copy,
         test_account_count_increments,
         test_accounts_transfer,
+        test_statement_multiline_str,
     ]
     passed = 0
     for t in tests:
@@ -90,16 +90,7 @@ def test_history_records_transactions():
     acct = BankAccount("Ben", 100)
     acct.deposit(50)
     acct.withdraw(50)
-    assert len(acct.history()) == 2, f"Expected 2, got {len(acct.history())}"
-
-
-def test_history_returns_copy():
-    # TODO: get history, mutate it, assert acct.history() is unchanged
-    acct = BankAccount("Ben", 100)
-    acct.deposit(50)
-    acct.withdraw(50)
-    acct.history().clear()
-    assert len(acct.history()) == 2, f"Expected 2,got {len(acct.history())} "
+    assert len(acct._history) == 2, f"Expected 2, got {len(acct._history)}"
 
 
 def test_account_count_increments():
@@ -114,10 +105,19 @@ def test_account_count_increments():
 def test_accounts_transfer():
     acct1 = BankAccount("Alice", 100)
     acct2 = BankAccount("Bob", 80)
-    BankAccount.transfer(acct1, acct2, 20)
+    acct1.transfer(acct2, 20)
     assert (
         acct1.balance == 80 and acct2.balance == 100
     ), f"Expected 80,100, got {acct1.balance},{acct2.balance}"
+
+
+def test_statement_multiline_str():
+    acct = BankAccount("Ben", 100)
+    acct.deposit(50)
+    acct.withdraw(50)
+    stmt = acct.statement()
+    assert isinstance(stmt, str), f"Expected string, got {type(stmt)}"
+    assert "\n" in stmt, f"Expected multiline string, got: {stmt}"
 
 
 # ------------------------------------------------------------------

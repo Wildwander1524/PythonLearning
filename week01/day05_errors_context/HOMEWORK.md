@@ -1,13 +1,13 @@
 # 📝 Day 5 Homework — Context-Managed Logger + a Package
 
 > **Goal:** Write a file logger that uses the **context-manager** protocol (guaranteed file close), with a **custom exception hierarchy**, and ship it as a real importable **package** with `__init__.py`.
-> **Time:** 3 h  ·  **Read first:** [`LEARNING.md`](./LEARNING.md)
+> **Time:** 3 h  ·  **Read first:** [`LESSON.md`](./LESSON.md)
 
 ---
 
 ## 📖 Before you start (5 min)
 
-Skim these sections of [`LEARNING.md`](./LEARNING.md):
+Skim these sections of [`LESSON.md`](./LESSON.md):
 - **"Context managers"** (rental-car / self-returning library book) → the *guarantee* you're building: the file closes on **every** exit path.
 - **"`__exit__`'s parameters"** + **"returns True/False"** → return `False` so exceptions propagate.
 - **"The exception hierarchy"** + **"custom exceptions"** (labeled fuse box) → `LogError` → `LogLevelError`.
@@ -114,3 +114,4 @@ git add week01/day05_errors_context
 git commit -m "add: Week1 D5 context-managed logger package"
 git push
 ```
+➡️ Then [`RECALL.md`](./RECALL.md), and again cold before Day 6.

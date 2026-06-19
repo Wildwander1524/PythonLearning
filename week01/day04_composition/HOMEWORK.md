@@ -1,13 +1,13 @@
 # 📝 Day 4 Homework — Refactor into `Bank` + `Account` + `Ledger`
 
 > **Goal:** Take your Day-1 `BankAccount` (which did *everything*) and split it into **composed** parts, each with one job. This is the week's single most important design lesson.
-> **Time:** 3 h  ·  **Read first:** [`LEARNING.md`](./LEARNING.md)
+> **Time:** 3 h  ·  **Read first:** [`LESSON.md`](./LESSON.md)
 
 ---
 
 ## 📖 Before you start (5 min)
 
-Skim these sections of [`LEARNING.md`](./LEARNING.md):
+Skim these sections of [`LESSON.md`](./LESSON.md):
 - **"Composition vs inheritance"** (Lego-vs-cast-statue, organs-vs-species) → the has-a / is-a test you'll apply throughout.
 - **"The `Stack(list)` trap"** → *why* composing a list beats inheriting from one; your `Ledger` follows the same logic.
 - **"`@dataclass`"** (the label-maker) → `Transaction` will be one.
@@ -110,3 +110,4 @@ git add week01/day04_composition
 git commit -m "add: Week1 D4 composed Bank/Account/Ledger"
 git push
 ```
+➡️ Then [`RECALL.md`](./RECALL.md), and again cold before Day 5.

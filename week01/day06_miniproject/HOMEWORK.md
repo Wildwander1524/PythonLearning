@@ -1,7 +1,7 @@
 # 📝 Day 6 Mini-Project — CLI Contact Book
 
 > **Goal:** Build a small but *complete* command-line app that uses **everything** from Week 1 — classes, encapsulation, a `@dataclass`, a custom exception hierarchy, JSON persistence, context managers, and a clean package. Your Week-1 capstone and first portfolio piece.
-> **Time:** 3 h  ·  **Read first:** [`LEARNING.md`](./LEARNING.md)
+> **Time:** 3 h  ·  **Read first:** [`LESSON.md`](./LESSON.md)
 
 ---
 
