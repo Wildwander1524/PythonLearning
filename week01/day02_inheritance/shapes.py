@@ -19,10 +19,10 @@ class Shape(ABC):
     def perimeter(self) -> float: ...
 
     def describe(self) -> str:
-        return f"Area: {self.area()},Perimeter: {self.perimeter}"
+        return f"AreaArea={self.area()},PerimeterArea={self.perimeter()}"
 
 
-class Circle(ABC):
+class Circle(Shape):
 
     def __init__(self, radius: float):
         self.radius = radius
@@ -34,7 +34,7 @@ class Circle(ABC):
         return math.pi * self.radius * 2
 
 
-class Triangle(ABC):
+class Triangle(Shape):
 
     def __init__(self, a: float, b: float, c: float):
         if a + b <= c or a + c <= b or b + c <= a:
@@ -51,7 +51,7 @@ class Triangle(ABC):
         return self.a + self.b + self.c
 
 
-class Rectangle(ABC):
+class Rectangle(Shape):
 
     def __init__(self, w: float, h: float):
         self.w = w

@@ -44,7 +44,7 @@ class Cat(Animal):
         return f"{super().speak()},then ignores you"
 
     def purr(self) -> str:
-        return f"{self.name}"
+        return f"{self.name} purrs contentedly"
 
 
 class Bird(Animal):
@@ -66,19 +66,22 @@ class Parrot(Bird):
         super().__init__(name)
         self.sound = "Squawk"
 
-    # EXTEND
-    def speak(self) -> str:
-        return f"{super().speak()},then fly away"
-
     def learn(self, phrase: str) -> str:
-        return f"{self.name} says {phrase}"
+        self._phrase = phrase
+
+    def speak(self) -> str:
+        base_speak = super().speak()
+        if hasattr(self, "_phrase"):
+            return f"{self.name} says {self._phrase}'"
+        return base_speak
 
 
 class Penguin(Bird):
 
     # TODO: replace fly()
     def __init__(self, name: str):
-        super(Bird, self).__init__(name, "pengpeng")
+        super().__init__(name, "pengpeng")
+        self.sound = "pengpeng"
 
     def fly(self, altitude: int) -> str:
         raise NotImplementedError("penguins can't fly")
