@@ -57,5 +57,6 @@ Write — without looking — a `Temperature` class: stores `_celsius`; exposes 
 
 ---
 > ⏱️ **Self-rating:** could you do section D cold *tomorrow*? Honest y/n → record it. A "no" isn't failure; it's the signal that tells tomorrow's spaced review what to hit.
+yes
 
 > 🇨🇳 ⏱️ **自评：** 你能在*明天*冷回忆的情况下完成 D 部分吗？如实 y/n → 记录下来。“不”不是失败；它是告诉明天的间隔复习该攻击哪里的信号。

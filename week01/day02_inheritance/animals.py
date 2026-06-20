@@ -13,87 +13,65 @@
 
 
 class Animal:
+
     def __init__(self, name: str, sound: str):
-        # TODO: store name and sound as instance attributes
         self.name = name
         self.sound = sound
 
     def speak(self) -> str:
-        # TODO: return e.g. "Rex says Woof"
         return f"{self.name} says {self.sound}"
 
 
-# ── Subclasses (level 1) ──────────────────────────────────────────────────────
-
-
 class Dog(Animal):
+
     def __init__(self, name: str):
-        # TODO: call super().__init__ with the right sound hardcoded
         super().__init__(name, "Woof")
 
-    def fetch(self, item: str) -> str:
-        # TODO: return e.g. "Rex fetches the ball!"
-        return f"{super().speak()},and touch your fingers!"
+    def speak(self) -> str:
+        return f"{super().speak()}"
+
+    def fetch(self, item) -> str:
+        return f"{self.name} fetches the {item}!"
 
 
 class Cat(Animal):
+
     def __init__(self, name: str):
         super().__init__(name, "Meow")
 
-    def speak(self) -> str:  # EXTEND — call super().speak() and add to it
-        # TODO: get the base string from super(), then add "... then ignores you"
-        return f"{super().speak()}... then ignores you"
+    # EXTEND
+    def speak(self) -> str:
+        return f"{super().speak()},then ignores you"
 
     def purr(self) -> str:
-        # TODO: return e.g. "Whiskers purrs..."
-        return f"Whiskers purrs..."
-
-
-class SwimMixin:
-
-    def __init__(self, name, **kwargs):
-        self.name = name
-        super().__init__(**kwargs)
-
-    def swim(self):
-        return f"{self.name} is swimming!"
+        return f"{self.name}"
 
 
 class Bird(Animal):
+
     def __init__(self, name: str):
-        # TODO: call super().__init__ with the right sound
         super().__init__(name, "Tweet")
 
+    # EXTEND
     def speak(self) -> str:
-        # TODO: your choice — EXTEND or REPLACE. Mark with a comment.
-        return f"{self.name} says {self.sound * 3}."
+        return f"{super().speak()},then flies around you!"
 
     def fly(self, altitude: int) -> str:
-        # TODO: return e.g. "Tweety flies at 100 m"
-        return f"{self.name} flies at {altitude} m"
-
-
-# ── Subclass (level 2) ────────────────────────────────────────────────────────
+        return f"{self.name} flies at {int(altitude)} m"
 
 
 class Parrot(Bird):
-    """Multi-level: Parrot → Bird → Animal."""
 
     def __init__(self, name: str):
-        # TODO: call super().__init__ — sound is hardcoded to "Squawk"
-        # Note: Bird.__init__ only takes a name, so figure out who sets the sound
-        super(Bird, self).__init__(name, "Squawk")
-        self._learned_phrase: str = ""  # starter: where the learned phrase lives
+        super().__init__(name)
+        self.sound = "Squawk"
 
-    def learn(self, phrase: str) -> None:
-        # TODO: store the phrase so speak() can use it
-        self._learned_phrase = phrase
-        pass
+    # EXTEND
+    def speak(self) -> str:
+        return f"{super().speak()},then fly away"
 
-    def speak(self) -> str:  # EXTEND
-        # TODO: call super().speak() to get "Polly says Squawk",
-        # then append " — <phrase>" if a phrase has been learned
-        return f"{super().speak()} — {self._learned_phrase}!"
+    def learn(self, phrase: str) -> str:
+        return f"{self.name} says {phrase}"
 
 
 class Penguin(Bird):
@@ -104,6 +82,14 @@ class Penguin(Bird):
 
     def fly(self, altitude: int) -> str:
         raise NotImplementedError("penguins can't fly")
+
+
+# ── Quick smoke-test (run this file directly to check your work) ──────────────
+
+if __name__ == "__main__":
+
+    # My Result : Parrot => Bird => Animal => Object
+    print(Parrot.__mro__)
 
 
 # ── MRO inspection ────────────────────────────────────────────────────────────
@@ -120,13 +106,12 @@ class Penguin(Bird):
 
 # ── Concept-check answers (fill these in after finishing the homework) ─────────
 
-# Q1: You removed super().__init__() from Dog. What error appears and why?
-# A1: TODO:After removing super().__init__(), the initialization happens directly via Dog.__init__(self, name) when you call d = Dog("Rex"). At that point, the object d only has a name attribute. If you then call d.speak, an AttributeError will occur.
+# Q1: You used super(Bird, self) before and it "worked." Explain precisely what it did to the MRO and why it was wrong anyway
+# A1: when I used super(Bird, self),the start point in MRO changed from Parrot to Bird,
+# then go on as it' ruler: Children precede Parents,and fixed left to right
 
-# Q2: In Parrot.__mro__, why does Bird appear before Animal?
-# A2: TODO:Because the MRO lookup order is left‑to‑right ancestor – that is, it first searches the parent classes from left to right; if not found, it goes up to the parent's parent, again from left to right, until it finds the method or reaches object. If it still isn't found, an AttributeError is raised.
+# Q2: Why does Bird come before Animal in Parrot.__mro__?
+# A3: Children precede Parents,and fixed left to right
 
-
-# Q3: Why is total_area (in shapes.py) better than if isinstance(...) ladders?
-#     What happens to each when you add a new Pentagon shape?
-# A3: TODO:The latter approach better follows the "duck typing" principle. When adding a new Pentagon shape, the former approach only requires creating a new Pentagon class and adding an area method, while the latter requires modifying the existing source code – obviously the latter is more troublesome.
+# Q3: Why is total_area better than an isinstance ladder?
+# A3: more flexible,makes debugging easier
