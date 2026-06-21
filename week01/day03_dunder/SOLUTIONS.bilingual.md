@@ -116,4 +116,6 @@ class Fraction:
 > 🇨🇳 打印 `[<...Vector2D object at 0x...>]` —— 容器使用 `__repr__`，缺少它会让列表/日志输出在调试时毫无用处。
 
 > 📝 Record: which dunder did you forget existed? That's a Day-4/6 re-test candidate.
+__mul__  __rmul__  __neg__
+
 > 🇨🇳 📝 记录：你忘了哪个双下划线方法的存在？那是第4/6天重测的候选内容。

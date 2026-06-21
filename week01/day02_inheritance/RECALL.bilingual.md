@@ -62,4 +62,6 @@ An ABC `PaymentMethod` with abstract `pay(amount)`; two concrete subclasses (`Ca
 
 ---
 > ⏱️ Could you produce section C's MRO cold tomorrow? y/n → record it. Two spaced "yes" = edge **E3 graduates**.
+Y
+
 > 🇨🇳 ⏱️ 你明天能冷不丁写出 C 部分的 MRO 吗？y/n → 记录下来。两次间隔“是的” = 达成 **E3 毕业**。

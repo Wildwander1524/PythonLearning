@@ -8,106 +8,102 @@
 
 import math
 
+class Fraction:
 
-class Vector2D:
-    """2D vector that behaves like a native Python numeric type."""
-
-    # ── Construction & display ─────────────────────────────────────────────
-
-    def __init__(self, x: float, y: float):
-        # TODO: store x and y as instance attributes
-        pass
+    def __init__(self, num, den):
+        self.num = num
+        self.den = den
 
     def __repr__(self) -> str:
-        # TODO: return 'Vector2D(3, 4)'  — round-trip format (valid Python to recreate it)
-        # Day 3 rule: __repr__ is for the developer, always define it first.
-        pass
+        return f"Fraction({self.num},{self.den})"
 
-    def __str__(self) -> str:
-        # TODO: return a friendlier string like '(3, 4)'
-        # (If you leave this out Python falls back to __repr__ — that's fine too.)
-        pass
-
-    # ── Equality ──────────────────────────────────────────────────────────
-
-    def __eq__(self, other) -> bool:
-        # TODO: return True only if other is a Vector2D with the same x and y.
-        # Return NotImplemented (not False!) if other is an unknown type —
-        # that tells Python "I don't know; try the other operand's __eq__."
-        pass
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Fraction):
+            return NotImplemented
+        return self.num * other.den == other.num * self.den
 
     def __hash__(self):
-        # Defining __eq__ makes the object unhashable by default (the coat-check rule).
-        # We restore it here so vectors can live in sets/dicts.
-        # Safe because we treat Vector2D as immutable (we never change x or y in-place).
-        # TODO: return hash of a tuple of the components
-        pass
+        return hash(self.num / self.den)
 
-    # ── Arithmetic ────────────────────────────────────────────────────────
+    def __add__(self, other: object) -> object:
+        return Fraction((self.num * other.den + other.num * self.den), self.den * other.den)
 
-    def __add__(self, other: "Vector2D") -> "Vector2D":
-        # TODO: return a NEW Vector2D whose components are the element-wise sum.
-        # Golden rule: never mutate self — like combining two recipes into a third.
-        pass
 
-    def __sub__(self, other: "Vector2D") -> "Vector2D":
-        # TODO: return a NEW Vector2D — element-wise difference
-        pass
 
-    def __mul__(self, scalar: float) -> "Vector2D":
-        # TODO: scalar multiply — return a NEW Vector2D with each component × scalar
-        # This handles v * 2.
-        pass
+class Vector2D:
 
-    def __rmul__(self, scalar: float) -> "Vector2D":
-        # Reflected multiply — handles 2 * v.
-        # Python calls this when int.__mul__(2, v) returns NotImplemented.
-        # TODO: delegate to __mul__ (one line)
-        pass
+    def __init__(self, x: float, y: float):
+        self.x = x
+        self.y = y
 
-    def __neg__(self) -> "Vector2D":
-        # TODO: return Vector2D(-self.x, -self.y)  so that -v works
-        pass
+    def __repr__(self) -> str:
+        return f'Vector2D({self.x}, {self.y})'
 
-    # ── Magnitude & dot product ───────────────────────────────────────────
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Vector2D):
+            return NotImplemented
+        return self.x == other.x and self.y == other.y
+
+    def __hash__(self):
+        return hash((self.x, self.y))
+
+    def __add__(self, other) -> object:
+        return Vector2D(self.x + other.x, self.y + other.y)
+
+    def __sub__(self, other) -> object:
+        return Vector2D(self.x - other.x, self.y - other.y)
+
+    def __neg__(self) -> object:
+        return Vector2D(-self.x, -self.y)
+
+    def __mul__(self, scalar: float) -> object:
+        return Vector2D(self.x * scalar, self.y * scalar)
+
+    def __rmul__(self, scalar: float) -> object:
+        return Vector2D(self.x * scalar, self.y * scalar)
 
     def __abs__(self) -> float:
-        # TODO: return the magnitude (Euclidean norm) — sqrt(x² + y²)
-        # Day 2 callback: this IS ‖v‖ from S3 math. Use math.sqrt or math.hypot.
-        pass
+        return math.sqrt(self.x ** 2 + self.y ** 2)
 
-    def dot(self, other: "Vector2D") -> float:
-        # TODO: return the dot product x1*x2 + y1*y2
-        # Day 2 callback: this IS the dot product formula from S3 math.
-        pass
-
-    # ── Indexing & iteration ──────────────────────────────────────────────
-
-    def __len__(self) -> int:
-        # A 2D vector always has 2 components.
+    def __len__(self):
         return 2
 
-    def __getitem__(self, index: int) -> float:
-        # TODO: return self.x for index 0, self.y for index 1.
-        # Raise IndexError for anything else — this is how for-loops know to stop
-        # if they use the old __getitem__ iteration protocol.
-        pass
+    def __getitem__(self, item):
+        return (self.x, self.y)[item]
 
     def __iter__(self):
-        # TODO: yield x, then yield y  (generator shortcut — the cassette-tape trick)
-        # This enables: for c in v, list(v), x, y = v  — all at once.
-        pass
+        yield self.x
+        yield self.y
+
+    def dot(self, other: object) -> float:
+        return self.x * other.x + self.y * other.y
+
+
+if __name__ == '__main__':
+    v, w = Vector2D(3, 4), Vector2D(1, 2)
+
+    print(repr(v))  # 'Vector2D(3, 4)'      (round-trips)
+    print(v == Vector2D(3, 4))  # True
+    print(v + w)  # Vector2D(4, 6)        (NEW object — v unchanged)
+    print(v - w)  # Vector2D(2, 2)
+    print(v * 2)  # Vector2D(6, 8)
+    print(abs(v))  # 5.0                   = ‖v‖, the D2 NORM
+    print(v.dot(w))  # 11                    = v·w, the D2 DOT PRODUCT
+    print(v[0], v[1])  # 3, 4
+    x, y = v  # unpacking via iteration
+    print(list(v))  # [3, 4]
+
 
 
 # ── Concept-check answers (fill in after finishing the implementation) ────────
 
 # Q1: Why must __add__ return a new Vector2D instead of modifying self.x/self.y?
-# A1: TODO
+# A1: Avoid hash collisions 
 
 # Q2: You defined __iter__ with yield. What two values does it produce,
 #     and how does Python know to stop?
-# A2: TODO
+# A2: It essentially created a generator, as he adheres to the lazy principle: proceed step by step, pausing after each one
 
 # Q3: If you delete __repr__, what does [Vector2D(3, 4)] print, and why is
 #     that bad for debugging?
-# A3: TODO
+# A3: Printing an address makes it hard to visually identify the issue during debugging, reducing efficiency.
