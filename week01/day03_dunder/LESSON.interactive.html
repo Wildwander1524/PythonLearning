@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 3 Interactive — Iteration &amp; Hashing｜迭代与哈希</title>
+<style>
+  :root{
+    --bg:#faf8f3; --ink:#2a2a28; --muted:#6f6a60; --line:#e3ddd0;
+    --iterable:#1f7a8c; --iterator:#c46b1a; --generator:#9c3d6b;
+    --ok:#2e7d4f; --bad:#c0392b; --card:#ffffff; --accent:#1f7a8c;
+    --mono:"Cascadia Code",ui-monospace,"SF Mono",Consolas,monospace;
+    --serif:Georgia,"Times New Roman",serif;
+    --sans:-apple-system,"Segoe UI",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+       line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:40px 24px 80px}
+  h1{font-family:var(--serif);font-size:2rem;line-height:1.2;margin:0 0 6px}
+  h2{font-family:var(--serif);font-size:1.5rem;margin:56px 0 4px;
+     padding-bottom:8px;border-bottom:2px solid var(--line)}
+  h3{font-family:var(--serif);font-size:1.18rem;margin:30px 0 4px}
+  .zh{color:var(--muted);font-size:.92rem;margin:2px 0 0}
+  .sub{color:var(--muted);font-size:1.02rem;margin:0 0 8px}
+  p{margin:10px 0}
+  code,kbd{font-family:var(--mono);font-size:.9em;background:#f0ece2;
+     padding:1px 5px;border-radius:4px}
+  .lead{background:#fff;border:1px solid var(--line);border-left:4px solid var(--accent);
+     border-radius:8px;padding:16px 20px;margin:18px 0}
+  .q{font-weight:600}
+  /* role cards */
+  .roles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0}
+  .role{background:var(--card);border:1px solid var(--line);border-radius:10px;
+     padding:16px;border-top:4px solid var(--line)}
+  .role.iterable{border-top-color:var(--iterable)}
+  .role.iterator{border-top-color:var(--iterator)}
+  .role.generator{border-top-color:var(--generator)}
+  .role h4{margin:0 0 2px;font-family:var(--serif);font-size:1.05rem}
+  .role .tag{font-family:var(--mono);font-size:.78rem;color:var(--muted)}
+  .role p{font-size:.9rem;margin:8px 0 0}
+  .role .emoji{font-size:1.6rem}
+  /* widget shell */
+  .widget{background:var(--card);border:1px solid var(--line);border-radius:12px;
+     padding:20px;margin:18px 0;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .widget h4{margin:0 0 12px;font-family:var(--serif);font-size:1.1rem}
+  .controls{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  button{font-family:var(--sans);font-size:.88rem;font-weight:600;cursor:pointer;
+     border:1px solid var(--line);background:#fff;color:var(--ink);
+     padding:8px 14px;border-radius:7px;transition:.12s}
+  button:hover{background:#f3efe6;border-color:#cfc8b8}
+  button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  button.primary:hover{filter:brightness(1.08)}
+  button.warn{background:var(--bad);color:#fff;border-color:var(--bad)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  /* iterator dispenser */
+  .ironbox{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:12px 0}
+  .vbox{border:2px dashed var(--iterable);border-radius:10px;padding:12px 16px;text-align:center}
+  .vbox .lab{font-family:var(--mono);font-size:.82rem;color:var(--iterable);font-weight:700}
+  .cells{display:flex;gap:6px;margin-top:8px}
+  .cell{width:46px;height:46px;display:flex;align-items:center;justify-content:center;
+     font-family:var(--mono);font-weight:700;font-size:1.1rem;border:1px solid var(--line);
+     border-radius:8px;background:#faf8f3}
+  .iters{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+  .itcard{border:1px solid var(--line);border-top:3px solid var(--iterator);border-radius:9px;
+     padding:10px 12px;min-width:150px;background:#fffdf9}
+  .itcard .name{font-family:var(--mono);font-weight:700;color:var(--iterator);font-size:.85rem}
+  .itcard .cell.here{background:#fde9d2;border-color:var(--iterator);box-shadow:0 0 0 2px #f3c892 inset}
+  .itcard .cell.done{opacity:.35}
+  .itcard .out{font-family:var(--mono);font-size:.78rem;color:var(--muted);margin-top:6px;min-height:1.2em}
+  .bookmark{color:var(--iterator);font-weight:700}
+  /* log */
+  .log{font-family:var(--mono);font-size:.8rem;background:#1e1c19;color:#d7d2c6;
+     border-radius:8px;padding:12px 14px;margin-top:12px;max-height:180px;overflow:auto;white-space:pre-wrap}
+  .log .y{color:#7fd1a0}.log .r{color:#e88}.log .d{color:#7fb2e8}.log .m{color:#9a948a}
+  /* tabs */
+  .tabs{display:flex;gap:6px;margin-bottom:10px}
+  .tab{padding:7px 13px;border:1px solid var(--line);border-radius:7px 7px 0 0;background:#f3efe6;font-size:.85rem;font-weight:600}
+  .tab.active{background:#fff;border-bottom-color:#fff;color:var(--accent)}
+  pre.code{font-family:var(--mono);font-size:.82rem;background:#1e1c19;color:#e6e1d6;
+     padding:14px 16px;border-radius:8px;overflow:auto;margin:8px 0;line-height:1.5}
+  pre.code .c{color:#8a857a}.pre .k{color:#d98ab5}
+  pre.code .kw{color:#d98ab5}.pre code{background:none}
+  /* nesting diagram */
+  .nest{position:relative;margin:16px auto;max-width:430px;text-align:center;font-family:var(--mono);font-weight:700}
+  .ring{border-radius:14px;padding:16px}
+  .ring.a{border:2px solid var(--iterable);color:var(--iterable)}
+  .ring.b{border:2px solid var(--iterator);color:var(--iterator);margin-top:8px}
+  .ring.c{border:2px solid var(--generator);color:var(--generator);margin-top:8px;padding:14px}
+  .ring small{display:block;font-family:var(--sans);font-weight:400;color:var(--muted);font-size:.74rem;margin-top:3px}
+  /* hash table */
+  .htgrid{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+  .buckets{flex:1;min-width:240px}
+  .bucket{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:7px;
+     padding:6px 8px;margin-bottom:6px;background:#faf8f3;transition:.15s}
+  .bucket .idx{font-family:var(--mono);font-weight:700;color:var(--muted);width:54px;font-size:.8rem}
+  .bucket.hit{background:#e3f3ea;border-color:var(--ok);box-shadow:0 0 0 2px #a9dcc0 inset}
+  .bucket.miss{background:#fbe7e4;border-color:var(--bad)}
+  .bucket.scan{background:#fff6da;border-color:#e0b94a}
+  .chip{font-family:var(--mono);font-size:.78rem;background:#fff;border:1px solid var(--line);
+     border-radius:20px;padding:3px 10px}
+  .chip.ghost{opacity:.4;text-decoration:line-through}
+  .keypad{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+  .keypad .chip{cursor:pointer}.keypad .chip:hover{background:#f0ece2}
+  .verdict{font-family:var(--mono);font-weight:700;margin-top:6px}
+  .verdict.ok{color:var(--ok)}.verdict.bad{color:var(--bad)}
+  .note{font-size:.86rem;color:var(--muted);margin-top:8px}
+  table.cmp{border-collapse:collapse;width:100%;margin:10px 0;font-size:.88rem}
+  table.cmp th,table.cmp td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  table.cmp th{background:#f3efe6;font-family:var(--serif)}
+  .pill{display:inline-block;font-family:var(--mono);font-size:.72rem;padding:1px 7px;border-radius:20px;color:#fff}
+  .pill.it{background:var(--iterable)}.pill.ir{background:var(--iterator)}.pill.ge{background:var(--generator)}
+  footer{margin-top:60px;border-top:2px solid var(--line);padding-top:20px;color:var(--muted);font-size:.9rem}
+  footer a{color:var(--accent)}
+  .ask{background:#fff;border:1px dashed var(--accent);border-radius:8px;padding:12px 16px;margin:16px 0;font-size:.92rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Day 3 · Interactive — Iteration &amp; Hashing</h1>
+  <p class="zh">第 3 天 · 交互 —— 迭代与哈希</p>
+  <p class="sub">An interactive companion for <code>RECALL</code> Part B &amp; C, built around the two things that felt fuzzy.</p>
+
+  <div class="lead">
+    <p class="q">① What's the real difference between an <em>iterable</em>, an <em>iterator</em>, and a <em>generator</em>?</p>
+    <p class="zh">可迭代对象、迭代器、生成器，三者到底有什么区别？</p>
+    <p class="q">② What does <code>__hash__</code> actually <em>do</em> under the hood, and why is it even necessary?</p>
+    <p class="zh"><code>__hash__</code> 底层到底做了什么？为什么需要它？</p>
+  </div>
+
+  <!-- ===================== PART 1 ===================== -->
+  <h2>1 · Iterable → Iterator → Generator</h2>
+  <p class="zh">可迭代对象 → 迭代器 → 生成器</p>
+
+  <p>These three are not three rivals — they're <strong>three layers of the same idea</strong>.
+  The trick is to ask one question about any object: <em>"What does it promise?"</em></p>
+
+  <div class="roles">
+    <div class="role iterable">
+      <div class="emoji">📚</div>
+      <h4>Iterable</h4>
+      <div class="tag">has __iter__</div>
+      <p>"I can <em>hand you</em> a fresh reader." A book on the shelf. Re-usable: ask twice, get two readers.</p>
+      <p class="zh">可迭代对象：有 <code>__iter__</code>，能交给你一个全新的读取器。像书，可反复借阅。</p>
+    </div>
+    <div class="role iterator">
+      <div class="emoji">🔖</div>
+      <h4>Iterator</h4>
+      <div class="tag">has __next__ (+__iter__)</div>
+      <p>"I remember <em>where I am</em>; click me for the next item, or <code>StopIteration</code>." A bookmark. One-shot: once read, it's spent.</p>
+      <p class="zh">迭代器：有 <code>__next__</code>，记住当前位置。像书签，一次性，读完即耗尽。</p>
+    </div>
+    <div class="role generator">
+      <div class="emoji">📼</div>
+      <h4>Generator</h4>
+      <div class="tag">a function with yield</div>
+      <p>An iterator you got <em>for free</em>: any function that <code>yield</code>s. Python writes <code>__next__</code> + <code>StopIteration</code> for you.</p>
+      <p class="zh">生成器：带 <code>yield</code> 的函数，<em>本身就是</em>迭代器，Python 替你写好了 <code>__next__</code>。</p>
+    </div>
+  </div>
+
+  <!-- Widget A: dispenser -->
+  <div class="widget">
+    <h4>🍬 Try it — the Pez-dispenser model</h4>
+    <p class="sub">The box (iterable) is <code>Vector2D(3, 4)</code>. Press <strong>iter(v)</strong> to pull out a loaded dispenser (iterator). Press <strong>next()</strong> on it to pop items. Pull a <em>second</em> dispenser to see they move independently — that's why the roles are split.</p>
+    <p class="zh">盒子（可迭代对象）是 <code>Vector2D(3,4)</code>。点 <strong>iter(v)</strong> 取出一个装好的分配器（迭代器）；点 <strong>next()</strong> 弹出元素。再取第二个分配器，会发现它们各自独立——这就是角色分离的原因。</p>
+
+    <div class="ironbox">
+      <div class="vbox">
+        <div class="lab">v = Vector2D(3, 4)</div>
+        <div class="cells"><div class="cell">3</div><div class="cell">4</div></div>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:6px">the iterable · never consumed</div>
+      </div>
+      <button class="primary" onclick="spawnIter()">iter(v) → new iterator</button>
+      <button onclick="resetIter()">reset</button>
+    </div>
+
+    <div class="iters" id="iters"></div>
+    <div class="log" id="iterLog"><span class="m"># press iter(v) to begin…</span></div>
+  </div>
+
+  <!-- Widget B: two ways for works -->
+  <div class="widget">
+    <h4>🔁 RECALL B3 — two ways to make <code>for x in v:</code> work</h4>
+    <p class="sub">A <code>for</code> loop doesn't need <code>__iter__</code> specifically — it needs <em>one of two</em> protocols. Step through each to see the exact calls Python makes.</p>
+    <p class="zh">让 <code>for</code> 能工作有两条路：要么 <code>__iter__</code>（新式协议），要么 <code>__getitem__</code>（旧式回退）。逐步看 Python 实际调用了什么。</p>
+
+    <div class="tabs">
+      <div class="tab active" id="tab-iter" onclick="pickProto('iter')">__iter__ (generator)</div>
+      <div class="tab" id="tab-getitem" onclick="pickProto('getitem')">__getitem__ (fallback)</div>
+    </div>
+
+    <div id="proto-iter">
+<pre class="code"><span class="kw">def</span> __iter__(self):
+    <span class="kw">yield</span> self.x      <span class="c"># 1st next() → 3</span>
+    <span class="kw">yield</span> self.y      <span class="c"># 2nd next() → 4; function ends → StopIteration</span></pre>
+    </div>
+    <div id="proto-getitem" style="display:none">
+<pre class="code"><span class="kw">def</span> __getitem__(self, i):
+    <span class="kw">return</span> (self.x, self.y)[i]   <span class="c"># v[0]=3, v[1]=4, v[2] → IndexError</span></pre>
+    </div>
+
+    <div class="controls">
+      <button class="primary" onclick="protoStep()">Step ▸</button>
+      <button onclick="protoRun()">Run all ⏩</button>
+      <button onclick="protoReset()">reset</button>
+    </div>
+    <div class="log" id="protoLog"><span class="m"># Step through `for x in v:`</span></div>
+    <p class="note">Both yield <code>3</code> then <code>4</code>. The difference is the <em>end signal</em>: a generator just <em>ends</em> (auto <code>StopIteration</code>); the index protocol walks <code>0,1,2…</code> until <code>IndexError</code>. Your <code>vector2d.py</code> ships <strong>both</strong> — that's why <code>list(v)</code>, <code>x,y = v</code>, and <code>v[0]</code> all work.</p>
+  </div>
+
+  <h3>So how do they nest?</h3>
+  <p class="zh">三者如何嵌套？</p>
+  <div class="nest">
+    <div class="ring a">ITERABLE — anything with <code>__iter__</code>
+      <small>📚 book · str, list, dict, set, your Vector2D · re-iterable</small>
+      <div class="ring b">ITERATOR — also has <code>__next__</code>, and <code>__iter__</code> returns <em>self</em>
+        <small>🔖 bookmark · stateful · one-shot</small>
+        <div class="ring c">GENERATOR — an iterator the compiler wrote from <code>yield</code>
+          <small>📼 the easy way to get the middle ring</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note">Every <span class="pill ge">generator</span> is an <span class="pill ir">iterator</span>; every <span class="pill ir">iterator</span> is an <span class="pill it">iterable</span> (its <code>__iter__</code> just returns itself). The reverse is false: a <code>list</code> is iterable but <em>not</em> its own iterator — that's why <code>iter(mylist)</code> gives you a separate cursor each time.</p>
+  <p class="zh">每个生成器都是迭代器；每个迭代器都是可迭代对象（其 <code>__iter__</code> 返回自身）。反之不成立：<code>list</code> 是可迭代的，但不是自己的迭代器 —— 所以每次 <code>iter(list)</code> 都给你一个独立游标。</p>
+
+  <table class="cmp">
+    <tr><th>Question</th><th><span class="pill it">iterable</span></th><th><span class="pill ir">iterator</span></th><th><span class="pill ge">generator</span></th></tr>
+    <tr><td>Defines…</td><td><code>__iter__</code></td><td><code>__next__</code> &amp; <code>__iter__</code></td><td>nothing — <code>yield</code> does it</td></tr>
+    <tr><td>Remembers position?</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Re-usable?</td><td>Yes (fresh cursor each time)</td><td>No (one pass, then empty)</td><td>No</td></tr>
+    <tr><td>You write…</td><td><code>iter(x)</code> to get one</td><td><code>next(it)</code> to advance</td><td>a <code>def</code> with <code>yield</code></td></tr>
+  </table>
+
+  <!-- ===================== PART 2 ===================== -->
+  <h2>2 · What <code>__hash__</code> really does — and why it's necessary</h2>
+  <p class="zh">2 · <code>__hash__</code> 底层做什么，以及为什么必要</p>
+
+  <p>A <code>set</code> / <code>dict</code> needs to answer <em>"is this item in here?"</em> in <strong>O(1)</strong> — without scanning every element. The trick: a hash function turns the object into a number, and that number <em>tells you which bucket to look in</em>. You check <em>one</em> bucket, not the whole collection.</p>
+  <p class="zh"><code>set</code>/<code>dict</code> 要在 <strong>O(1)</strong> 内回答"这个元素在不在里面？"，不能逐个扫描。诀窍：哈希函数把对象变成一个数字，这个数字<em>直接告诉你去哪个桶找</em>。你只查<em>一个</em>桶，而非整个集合。</p>
+
+  <!-- Widget C: hash table -->
+  <div class="widget">
+    <h4>🗄️ Try it — hash = which bucket?</h4>
+    <p class="sub">Click a key to <strong>insert</strong> it: we compute <code>hash(key) % 6</code> and drop it in that bucket. Then <strong>look one up</strong>: watch how O(1) hash lookup checks a single bucket, while a plain list must scan everything.</p>
+    <p class="zh">点击键来<strong>插入</strong>：计算 <code>hash(key) % 6</code> 放入对应桶。再<strong>查找</strong>：哈希查找只看一个桶（O(1)），而列表必须全部扫描（O(n)）。</p>
+
+    <div class="htgrid">
+      <div class="buckets" id="buckets"></div>
+      <div style="flex:1;min-width:230px">
+        <p style="margin:0;font-weight:600;font-size:.86rem">Insert a key｜插入键</p>
+        <div class="keypad" id="insertPad"></div>
+        <p style="margin:10px 0 0;font-weight:600;font-size:.86rem">Look one up｜查找</p>
+        <div class="keypad" id="lookupPad"></div>
+        <div class="controls">
+          <button class="primary" id="modeBtn" onclick="toggleScan()">mode: O(1) hash</button>
+          <button onclick="resetHash()">reset</button>
+        </div>
+        <div class="verdict" id="hashVerdict"></div>
+        <div class="log" id="hashLog" style="max-height:120px"><span class="m"># insert some keys, then look one up</span></div>
+      </div>
+    </div>
+    <p class="note">A hash function must be <strong>deterministic</strong>: the same key must always produce the same number, or you'd drop it in one bucket and look in another. (Here <code>hash("cat")</code> = sum of char codes, for show; CPython's real one is fancier but obeys the same rule.)</p>
+  </div>
+
+  <!-- Widget D: contract + footgun -->
+  <div class="widget">
+    <h4>⚠️ RECALL B2 — the <code>__eq__</code> / <code>__hash__</code> contract</h4>
+    <p class="sub">The golden rule: <strong>equal objects must hash equal.</strong> If they don't, the set looks in the wrong bucket and can't find what it's holding. Walk the three states:</p>
+    <p class="zh">黄金契约：<strong>相等的对象必须哈希相等。</strong> 否则集合会去错误的桶里找，明明装着却找不到。看三种状态：</p>
+
+    <div class="controls">
+      <button id="s1" class="primary" onclick="contract(1)">① define __eq__, no __hash__</button>
+      <button id="s2" onclick="contract(2)">② add __hash__ (immutable)</button>
+      <button id="s3" onclick="contract(3)">③ mutate a key after insert</button>
+    </div>
+
+    <div class="buckets" id="cbuckets" style="margin-top:10px"></div>
+    <div class="verdict" id="cVerdict"></div>
+    <div class="log" id="cLog"><span class="m"># pick a state above</span></div>
+  </div>
+
+  <div class="lead">
+    <p class="q">🎯 This is the bug hiding in your own <code>vector2d.py</code>.</p>
+    <p>You defined <code>__hash__</code> as <code>hash((self.x, self.y))</code> — correct <em>only if</em> the vector is treated as immutable. But <code>x</code> and <code>y</code> are plain settable attributes. Put <code>v</code> in a <code>set</code>, then do <code>v.x = 9</code>, and <code>v</code> becomes a <strong>ghost</strong>: still sitting in its old bucket, but <code>v in myset</code> now returns <code>False</code> (state ③ above). That's the exact reason <code>__add__</code> must return a <em>new</em> object instead of mutating (RECALL Part C) — and the deeper answer to your homework Q1, which you'd half-answered as "avoid hash collisions."</p>
+    <p class="zh">你把 <code>__hash__</code> 写成 <code>hash((x, y))</code> —— 只有把向量当作不可变时才正确。但 <code>x</code>、<code>y</code> 是可随意修改的属性。把 <code>v</code> 放进 <code>set</code> 后再 <code>v.x = 9</code>，<code>v</code> 就成了"幽灵"：还在旧桶里，但 <code>v in myset</code> 已返回 <code>False</code>。这正是 <code>__add__</code> 必须返回<em>新</em>对象的原因（Part C），也是作业 Q1 更深层的答案 —— 你当时答的"避免哈希冲突"只对了一半。</p>
+  </div>
+
+  <h3>The right call for each case</h3>
+  <table class="cmp">
+    <tr><th>Your object is…</th><th>Define <code>__hash__</code>?</th><th>Why</th></tr>
+    <tr><td><strong>Immutable</strong> (Fraction you never mutate, tuple-like)</td><td>✅ yes — <code>hash((fields))</code></td><td>Hash is stable → safe as a dict key / set member.</td></tr>
+    <tr><td><strong>Mutable</strong> (Vector2D with settable x,y)</td><td>❌ no — leave <code>__hash__ = None</code></td><td>Hash would drift on mutation → ghost entries. Python disables it for you the moment you write <code>__eq__</code>.</td></tr>
+  </table>
+  <p class="note">So defining <code>__eq__</code> and getting "unhashable type" is not a bug — it's Python protecting you. You only add <code>__hash__</code> back when you can <em>promise</em> the object won't change.</p>
+
+  <div class="ask">
+    💬 <strong>Quiz yourself out loud (then ask me to check):</strong>
+    (a) Why can a <code>list</code> never go in a <code>set</code>, but a <code>tuple</code> can?
+    (b) Your <code>Fraction</code> defines <code>__hash__</code> as <code>hash(self.num/self.den)</code> — name one input where that <em>breaks</em> the "equal → equal hash" contract. <span class="zh">(提示：1/3 与 2/6 相等吗？浮点除法呢？)</span>
+  </div>
+
+  <footer>
+    <p><strong>Primary sources</strong> · Luciano Ramalho, <em>Fluent Python</em> Ch. 1 &amp; Ch. 17 (iterables/iterators) · the official <a href="https://docs.python.org/3/reference/datamodel.html#object.__hash__">Python Data Model — <code>__hash__</code></a> and <a href="https://docs.python.org/3/glossary.html#term-generator">glossary: generator</a>.</p>
+    <p><strong>Back to:</strong> <a href="./LESSON.bilingual.md">LESSON</a> · <a href="./RECALL.bilingual.md">RECALL</a> · <a href="./SOLUTIONS.bilingual.md">SOLUTIONS</a> · <a href="./vector2d.py">vector2d.py</a></p>
+    <p>👩‍🏫 I'm your teacher for this — if any animation didn't click, ask me to re-explain that exact step, or to generate more practice predictions.</p>
+    <p class="zh">这是 D03 的交互式升级版。哪一步没看懂，直接让我重讲或多出几道预测题。</p>
+  </footer>
+
+</div>
+
+<script>
+/* ========== Widget A: iterator dispenser ========== */
+const COMP = [3, 4];
+let itN = 0, iters = {};
+const iterLog = document.getElementById('iterLog');
+function logTo(el, html, cls){
+  if(el.querySelector('.m')) el.innerHTML='';
+  el.innerHTML += `<div><span class="${cls||''}">${html}</span></div>`;
+  el.scrollTop = el.scrollHeight;
+}
+function spawnIter(){
+  itN++; iters['it'+itN] = {pos:0, done:false};
+  logTo(iterLog, `it${itN} = iter(v)   <span class="m"># fresh iterator, position 0</span>`, 'd');
+  renderIters();
+}
+function nextIter(id){
+  const it = iters[id];
+  if(it.pos < COMP.length){
+    const v = COMP[it.pos]; it.pos++;
+    logTo(iterLog, `next(${id}) → yield ${v}`, 'y');
+  } else {
+    it.done = true;
+    logTo(iterLog, `next(${id}) → raise StopIteration`, 'r');
+  }
+  renderIters();
+}
+function renderIters(){
+  const box = document.getElementById('iters');
+  box.innerHTML = '';
+  for(const id in iters){
+    const it = iters[id];
+    const cells = COMP.map((v,i)=>{
+      let cls='cell';
+      if(i<it.pos) cls+=' done';
+      if(i===it.pos && !it.done) cls+=' here';
+      return `<div class="${cls}">${v}</div>`;
+    }).join('');
+    const mark = it.done
+      ? '<span class="bookmark">⛔ exhausted</span>'
+      : `<span class="bookmark">🔖 at index ${it.pos}</span>`;
+    const out = it.done
+      ? '<span class="r">StopIteration — this dispenser is empty</span>'
+      : `next click → yields ${COMP[it.pos]}`;
+    box.innerHTML += `<div class="itcard">
+        <div class="name">${id}</div>
+        <div class="cells">${cells}</div>
+        <div style="margin:6px 0">${mark}</div>
+        <button onclick="nextIter('${id}')" ${it.done?'disabled':''}>next(${id})</button>
+        <div class="out">${out}</div>
+      </div>`;
+  }
+}
+function resetIter(){ itN=0; iters={}; document.getElementById('iters').innerHTML='';
+  iterLog.innerHTML='<span class="m"># press iter(v) to begin…</span>'; }
+
+/* ========== Widget B: two protocols ========== */
+let proto='iter', pstep=0;
+const protoLog=document.getElementById('protoLog');
+const ITER_STEPS=[
+  ['it = iter(v)','<span class="d">it = iter(v)   # __iter__ returns the generator</span>'],
+  ['next 3','<span class="y">x = next(it) → 3   # for-body runs with x=3</span>'],
+  ['next 4','<span class="y">x = next(it) → 4   # for-body runs with x=4</span>'],
+  ['stop','<span class="r">next(it) → StopIteration   # loop ends cleanly</span>']
+];
+const GET_STEPS=[
+  ['v[0]','<span class="y">v[0] → 3   # for-body runs with x=3</span>'],
+  ['v[1]','<span class="y">v[1] → 4   # for-body runs with x=4</span>'],
+  ['v[2]','<span class="r">v[2] → IndexError   # Python catches it → loop ends</span>']
+];
+function steps(){ return proto==='iter'?ITER_STEPS:GET_STEPS; }
+function pickProto(p){
+  proto=p; protoReset();
+  document.getElementById('tab-iter').classList.toggle('active',p==='iter');
+  document.getElementById('tab-getitem').classList.toggle('active',p==='getitem');
+  document.getElementById('proto-iter').style.display = p==='iter'?'block':'none';
+  document.getElementById('proto-getitem').style.display = p==='getitem'?'block':'none';
+}
+function protoStep(){
+  const s=steps();
+  if(pstep>=s.length) return;
+  logTo(protoLog, s[pstep][1]);
+  pstep++;
+}
+function protoRun(){ const s=steps(); while(pstep<s.length) protoStep(); }
+function protoReset(){ pstep=0; protoLog.innerHTML='<span class="m"># Step through `for x in v:`</span>'; }
+
+/* ========== Widget C: hash table ========== */
+const NB=6;
+let table=[]; for(let i=0;i<NB;i++) table.push([]);
+const KEYS=['cat','dog','fish','bird',42,7,'Vector2D(1,2)'];
+function hkey(k){
+  if(typeof k==='number') return k;
+  let h=0; for(const ch of String(k)) h+=ch.charCodeAt(0); return h;
+}
+function bucketOf(k){ return ((hkey(k)%NB)+NB)%NB; }
+const hashLog=document.getElementById('hashLog');
+let scanMode=false;
+function renderBuckets(){
+  const el=document.getElementById('buckets'); el.innerHTML='';
+  for(let i=0;i<NB;i++){
+    const chips=table[i].map(c=>`<span class="chip">${c}</span>`).join('');
+    el.innerHTML+=`<div class="bucket" id="b${i}"><span class="idx">bucket ${i}</span>${chips||'<span class="chip" style="opacity:.3">empty</span>'}</div>`;
+  }
+}
+function clearHL(pref='b'){ for(let i=0;i<NB;i++){const b=document.getElementById(pref+i); if(b)b.className='bucket';} }
+function hInsert(k){
+  const b=bucketOf(k);
+  if(!table[b].includes(k)) table[b].push(k);
+  renderBuckets(); clearHL();
+  document.getElementById('b'+b).classList.add('hit');
+  logTo(hashLog,`insert ${js(k)} → hash=${hkey(k)} → ${hkey(k)} % ${NB} = bucket ${b}`,'d');
+  document.getElementById('hashVerdict').textContent='';
+}
+function hLookup(k){
+  clearHL();
+  const target=bucketOf(k);
+  const vEl=document.getElementById('hashVerdict');
+  if(scanMode){
+    // O(n): scan every chip
+    let checks=0, found=false;
+    for(let i=0;i<NB;i++){ for(const c of table[i]){ checks++; if(c===k){found=true;} } }
+    for(let i=0;i<NB;i++){ if(table[i].length) document.getElementById('b'+i).classList.add('scan'); }
+    logTo(hashLog,`list lookup ${js(k)}: scanned ${checks} item(s) across all buckets`,'m');
+    vEl.textContent = found?`O(n) scan → found after touching ${checks} items`:`O(n) scan → not found (${checks} items checked)`;
+    vEl.className='verdict '+(found?'ok':'bad');
+  } else {
+    const b=document.getElementById('b'+target);
+    const found=table[target].includes(k);
+    b.classList.add(found?'hit':'miss');
+    logTo(hashLog,`lookup ${js(k)} → go straight to bucket ${target} → ${found?'FOUND ✓':'absent ✗'}`, found?'y':'r');
+    vEl.textContent = found?`O(1) → checked just bucket ${target}, found it`:`O(1) → checked just bucket ${target}, not there`;
+    vEl.className='verdict '+(found?'ok':'bad');
+  }
+}
+function js(k){ return typeof k==='number'?k:`"${k}"`; }
+function toggleScan(){
+  scanMode=!scanMode;
+  document.getElementById('modeBtn').textContent = scanMode?'mode: O(n) list scan':'mode: O(1) hash';
+  document.getElementById('modeBtn').classList.toggle('primary',!scanMode);
+}
+function resetHash(){ table=[]; for(let i=0;i<NB;i++) table.push([]); renderBuckets();
+  hashLog.innerHTML='<span class="m"># insert some keys, then look one up</span>';
+  document.getElementById('hashVerdict').textContent=''; }
+function buildPads(){
+  const ins=document.getElementById('insertPad'), look=document.getElementById('lookupPad');
+  KEYS.forEach(k=>{
+    ins.innerHTML+=`<span class="chip" onclick="hInsert(${typeof k==='number'?k:`'${k}'`})">+ ${js(k)}</span>`;
+    look.innerHTML+=`<span class="chip" onclick="hLookup(${typeof k==='number'?k:`'${k}'`})">? ${js(k)}</span>`;
+  });
+}
+
+/* ========== Widget D: contract + footgun ========== */
+const cbk=document.getElementById('cbuckets'), cLog=document.getElementById('cLog'), cV=document.getElementById('cVerdict');
+function renderC(buckets, ghostBucket, ghostIdx, lookupBucket, lookupHit){
+  cbk.innerHTML='';
+  for(let i=0;i<NB;i++){
+    let chips=(buckets[i]||[]).map((c,j)=>{
+      const ghost=(i===ghostBucket && j===ghostIdx);
+      return `<span class="chip${ghost?' ghost':''}">${c}</span>`;
+    }).join('');
+    let cls='bucket';
+    if(i===lookupBucket) cls+= lookupHit?' hit':' miss';
+    cbk.innerHTML+=`<div class="bucket ${cls}"><span class="idx">bucket ${i}</span>${chips||'<span class="chip" style="opacity:.3">empty</span>'}</div>`;
+  }
+}
+function contract(state){
+  ['s1','s2','s3'].forEach((id,i)=>document.getElementById(id).classList.toggle('primary',i===state-1));
+  const empty=()=>{const b=[];for(let i=0;i<NB;i++)b.push([]);return b;};
+  cLog.innerHTML='';
+  if(state===1){
+    renderC(empty(),-1,-1,-1,false);
+    logTo(cLog,'class Vector2D:  __eq__ defined,  __hash__ = None  (Python set it)','d');
+    logTo(cLog,'>>> s = set()','m');
+    logTo(cLog,">>> s.add(Vector2D(1,2))",'m');
+    logTo(cLog,'TypeError: unhashable type: \'Vector2D\'','r');
+    cV.textContent="Python refuses to hash it — it can't verify your __eq__ keeps the contract.";
+    cV.className='verdict bad';
+  }
+  else if(state===2){
+    const b=[];for(let i=0;i<NB;i++)b.push([]);
+    const bk=bucketOf('Vector2D(1,2)'); b[bk].push('Vector2D(1,2)');
+    renderC(b,-1,-1,bk,true);
+    logTo(cLog,'add __hash__ = hash((x,y))   # promise: never mutate','d');
+    logTo(cLog,`s.add(v)  → bucket ${bk}`,'y');
+    logTo(cLog,`v in s    → look in bucket ${bk} → FOUND ✓`,'y');
+    cV.textContent='Stable hash → equal objects land in the same bucket → lookups work.';
+    cV.className='verdict ok';
+  }
+  else{
+    const b=[];for(let i=0;i<NB;i++)b.push([]);
+    const oldBk=bucketOf('Vector2D(1,2)'); b[oldBk].push('Vector2D(9,2)→was(1,2)');
+    const newBk=bucketOf('Vector2D(9,2)');
+    renderC(b,oldBk,0,newBk,false);
+    logTo(cLog,`s.add(v)        # v=(1,2) → bucket ${oldBk}`,'d');
+    logTo(cLog,'v.x = 9         # MUTATED after insertion','r');
+    logTo(cLog,`v in s          # now hash((9,2)) → bucket ${newBk}`,'m');
+    logTo(cLog,`look in bucket ${newBk} → empty → False  😱  (v is still in bucket ${oldBk})`,'r');
+    cV.textContent=`Ghost! v sits in bucket ${oldBk} but lookup goes to bucket ${newBk}. "in" returns False though it's "in" the set.`;
+    cV.className='verdict bad';
+  }
+}
+
+/* init */
+buildPads(); renderBuckets(); contract(1);
+</script>
+</body>
+</html>
