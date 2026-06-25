@@ -20,6 +20,13 @@
   the old bucket. A **ghost entry**.
 - Correct: only define `__hash__` if you *promise* immutability. Mutable → leave it unhashable.
 
+**M13 · "The `__eq__`/`__hash__` *contract* is 'define `__eq__` → `__hash__` becomes `None`'."**  ⟶ E4  *(surfaced 2026-06-22 cold check)*
+- Counter: that's the **guardrail** Python auto-applies, not the contract. The contract is a separate
+  invariant: `a == b ⟹ hash(a) == hash(b)`. (And **not** the reverse — equal hashes needn't mean equal
+  objects; that's a legal *collision*, e.g. `hash(-1) == hash(-2) == -2`.)
+- Correct: contract = "equal objects must hash equal"; `__hash__ = None` is merely *how Python protects*
+  that contract when it can no longer verify it.
+
 **M4 · "Iterable and iterator are the same thing."**  ⟶ —
 - Counter: a `list` is iterable but **not** its own iterator — `iter(lst)` hands back a *separate*
   cursor each call; `next(lst)` raises `TypeError`.
@@ -65,6 +72,31 @@
 **M12 · "`(a + b)² = a² + b²`."**  ⟶ E2  *(generic algebra trap)*
 - Counter: `(1+2)² = 9`, not `1 + 4 = 5`. Missing the `2ab` cross term.
 - Correct: `(a+b)² = a² + 2ab + b²`.
+
+## Errors, exceptions & context managers (D5)
+
+**M14 · "Catch broadly — `except Exception:` (or bare `except:`) is the safe default."**  ⟶ E4
+- Counter: bare `except:` also swallows `KeyboardInterrupt` / `SystemExit` (those are `BaseException`,
+  *not* `Exception`) — you can't even Ctrl-C out — and it hides the real bug behind a generic catch.
+- Correct: catch the **narrowest** type you can actually handle; let the rest propagate. `except
+  Exception` belongs only at a top-level boundary, never bare.
+
+**M15 · "The order of `except` blocks doesn't matter."**  ⟶ E3
+- Counter: `except Exception:` placed *before* `except ValueError:` shadows the specific one — matching
+  is top-down, first hit wins, so the `ValueError` arm is dead code.
+- Correct: order **specific → general** (subclasses before their parents), same instinct as MRO.
+
+**M16 · "A custom exception should subclass `BaseException`."**  ⟶ E3
+- Counter: `BaseException` is the root of *system-exiting* signals (`SystemExit`, `KeyboardInterrupt`).
+  Subclass it and a normal `except Exception:` will sail right past your error.
+- Correct: inherit from **`Exception`** (or a more specific built-in). Give the app one base class
+  (`class MyAppError(Exception)`) so callers can catch the whole family with `except MyAppError:`.
+
+**M17 · "`with` (a context manager) suppresses exceptions raised inside it."**  ⟶ E4
+- Counter: `with open(...)` still lets a `ValueError` from inside propagate. `__exit__` swallows the
+  exception **only if it returns a truthy value**; returning `None`/falsy (the default) re-raises.
+- Correct: `__exit__` runs **guaranteed** — success *or* error, like `finally` — for cleanup; suppression
+  is opt-in via `return True`. And `as` binds whatever `__enter__` *returns*, not the manager itself.
 
 ---
 > When a new day's topic lands, add its 2–4 classic traps here *before* writing that day's RECALL,

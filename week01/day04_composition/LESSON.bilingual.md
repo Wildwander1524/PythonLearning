@@ -32,6 +32,12 @@
 C1 (D2) what does an **ABC** guarantee, and when does it reject a bad subclass? C2 (D3) you
 defined `__eq__`; why won't your object go in a `set`, and what's the fix? C3 (D3) what must
 `a + b` return?
+
+MY ANSWER:
+C1: it guarantees that all subclasses implement the abstract methods; it rejects a bad subclass at
+instantiation time
+C2: Because hashable objects must have a `__hash__` method, and defining `__eq__` without `__hash__` makes the object unhashable. The fix is to define a `__hash__` method that is consistent with `__eq__`.
+C3: `a + b` must return a new object that represents the sum of `a` and `b`
 > 🇨🇳 C1 (D2) 抽象基类保证什么？它何时拒绝一个错误的子类？ C2 (D3) 你定义了 `__eq__`；为什么你的对象
 > 放不进 `set`，以及如何修正？ C3 (D3) `a + b` 必须返回什么？
 

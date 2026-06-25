@@ -17,30 +17,48 @@
 
 | Concept | Edge | Last seen | q | ease | interval | **Next due** |
 |---------|------|-----------|---|------|----------|--------------|
-| Iterable vs iterator vs generator | — | 2026-06-21 | 2 | 2.3 | 1d | **2026-06-22** ⏰ |
-| `__eq__` / `__hash__` contract + mutable footgun | E4 | 2026-06-21 | 2 | 2.3 | 1d | **2026-06-22** ⏰ |
-| 3-level MRO prediction (`super()` ≠ parent) | E3 | 2026-06-20 | 3 | 2.5 | 2d | **2026-06-22** ⏰ |
+| Generator = `yield`-fn (auto `StopIteration`) | — | 2026-06-25 | 2 | 2.3 | 1d | **2026-06-26** |
+| Matrix × vector (row·vector dots) | E2 | 2026-06-25 | 2 | 2.3 | 1d | **2026-06-26** |
+
+> ✅ **2026-06-25 — 3 overdue items tested cold** (start of Day-5 session, before new material):
+> - *Generator = `yield`-fn* — **q2**: `StopIteration` named but **searched** (no unaided recall). Reset 1d, ease 2.5→2.3, due 06-26.
+> - *Matrix × vector* — **q2**: `[[6],[15]]` values right but **searched** + structure was scaffolded. Reset 1d, ease 2.5→2.3, due 06-26.
+> - *Two ways to make `for` work* (`__iter__`/`__getitem__`) — **q4 graduated**: both named cold, distinction held; banked the `IndexError`-stops-`__getitem__` nuance. 2d→6d, **due 07-01** (→ Scheduled).
+>
+> ✅ **2026-06-24 — Day-4 RECALL graded** (composition / `@dataclass` / matrix math; grill folded in):
+> - *Composition vs inheritance* (E4) — **solid q4**: B1 all four · B2 `sort`/`insert` leak · D `Playlist`
+>   has-a + `append`/`extend`/`insert`/`sort`. Grill Q1+Q2 cleared. **2d → 6d** (due 06-30).
+> - *`@dataclass` mutable-default* (E4) — **solid q4**: `field(default_factory=list)`, shared-list fix,
+>   `__slots__` speed→memory slip self-corrected on one nudge. **2d → 6d** (due 06-30).
+> - *`__eq__`/`__hash__`* (E4) — **q3**: fixes + guardrail cold (S2), but the **contract invariant**
+>   (`a==b ⟹ hash(a)==hash(b)`) still wasn't *stated* — re-test the invariant. Held, due 06-27.
+> - *Golden rule `__add__`* (E4) — **pulled back to q3**: "new object" right, but the *why* cross-wired
+>   with the hash contract (2 nudges to reach "operands unchanged + no aliasing"). Re-test the WHY. Due 06-27.
+> - *Matrix × matrix / identity / non-commutativity* (E2) — **q3**: `A·I=A` instant, `A·B≠B·A` known,
+>   but row·col **arithmetic slipped twice** (E1→19, E3 (1,2) entry) — needed recompute. Drill it. Due 06-26.
 
 ## Scheduled (not yet due)
 
 | Concept | Edge | Last seen | q | ease | interval | Next due |
 |---------|------|-----------|---|------|----------|----------|
-| Generator = `yield`-fn (auto `StopIteration`) | — | 2026-06-21 | 3 | 2.5 | 2d | 2026-06-23 |
-| Matrix × vector (row·vector dots) | E2 | 2026-06-21 | 3 | 2.5 | 2d | 2026-06-23 |
-| Two ways to make `for` work (`__iter__` / `__getitem__`) | E1 | 2026-06-21 | 3 | 2.5 | 2d | 2026-06-23 |
+| Matrix × matrix / identity / non-commutativity (by hand) | E2 | 2026-06-24 | 3 | 2.5 | 2d | 2026-06-26 |
 | `NotImplemented` vs `False` in `__eq__` | — | 2026-06-20 | 4 | 2.6 | 6d | 2026-06-26 |
 | `__repr__` vs `__str__` (fallback direction) | — | 2026-06-20 | 4 | 2.6 | 6d | 2026-06-26 |
-| Golden rule: `__add__` returns a NEW object | E4 | 2026-06-20 | 4 | 2.6 | 6d | 2026-06-26 |
 | Read-only `@property` invariant (no setter) | — | 2026-06-18 | 4 | 2.6 | 6d | 2026-06-26 |
 | EXTEND vs REPLACE override flavor | E3 | 2026-06-18 | 4 | 2.6 | 6d | 2026-06-26 |
+| Golden rule: `__add__` — re-test the ***why*** (operands unchanged, no aliasing) | E4 | 2026-06-24 | 3 | 2.5 | 3d | 2026-06-27 |
+| `__eq__` / `__hash__` — re-test the **contract invariant** | E4 | 2026-06-24 | 3 | 2.3 | 3d | 2026-06-27 |
+| 3-level MRO prediction (`super()` ≠ parent) | E3 | 2026-06-22 | 4↑ | 2.6 | 5d | 2026-06-27 |
+| Iterable vs iterator vs generator | — | 2026-06-22 | 4↑ | 2.5 | 6d | 2026-06-28 |
+| Two ways to make `for` work (`__iter__` / `__getitem__`, `IndexError` stop) | E1 | 2026-06-25 | 4↑ | 2.6 | 6d | 2026-07-01 |
+| Composition vs inheritance (is-a / has-a) | E4 | 2026-06-24 | 4↑ | 2.6 | 6d | 2026-06-30 |
+| `@dataclass` mutable-default (`field(default_factory=…)`) | E4 | 2026-06-24 | 4↑ | 2.6 | 6d | 2026-06-30 |
 | Dot product / norm by hand | E2✅ | 2026-06-20 | 5 | 2.7 | 11d | 2026-07-01 |
 
 ## Awaiting first exposure (add once graded)
 
-- Composition vs inheritance (is-a / has-a)  ← D4
-- `@dataclass` + mutable-default safety (`field(default_factory=...)`)  ← D4
-- Matrix × matrix · identity · inverse  ← D4 math
-- Custom exception hierarchy · context managers  ← D5
+- Matrix **inverse** (compute by hand) ← D4 math — covered conceptually, not yet drilled
+- Custom exception hierarchy · context managers ← D5
 
 ---
 > Edges: **E1** spec precision · **E2** formula/units · **E3** MRO/inheritance · **E4** Pythonic

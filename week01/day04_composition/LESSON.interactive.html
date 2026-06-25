@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 4 · Composition vs Inheritance — the Interface Leak</title>
+<style>
+  :root{
+    --bg:#f7f8fa; --card:#ffffff; --ink:#1c2430; --muted:#6b7686;
+    --line:#e3e7ee; --good:#1c8a4e; --good-bg:#e9f7ef; --bad:#c92a2a; --bad-bg:#fdecec;
+    --accent:#2f6df0; --accent-bg:#eaf1ff; --top:#f0c419;
+    --code:#0b1d33; --codebg:#0d1726;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Segoe UI",system-ui,-apple-system,"Microsoft YaHei",sans-serif;
+    line-height:1.5; padding:28px 18px 60px;
+  }
+  .wrap{max-width:1080px; margin:0 auto}
+  h1{font-size:1.5rem; margin:0 0 4px}
+  .zh{color:var(--muted); font-size:.95rem}
+  .lede{margin:14px 0 8px; font-size:1rem}
+  .lede code{background:#eef1f6; padding:1px 6px; border-radius:5px; font-size:.9em}
+  .tally{
+    display:flex; gap:10px; flex-wrap:wrap; margin:14px 0 22px;
+  }
+  .pill{
+    border:1px solid var(--line); border-radius:999px; padding:6px 14px;
+    background:var(--card); font-size:.86rem; font-weight:600;
+  }
+  .pill b{font-variant-numeric:tabular-nums}
+  .pill.bad{color:var(--bad); border-color:#f3c5c5; background:var(--bad-bg)}
+  .pill.good{color:var(--good); border-color:#bfe6cf; background:var(--good-bg)}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+  .panel{
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:16px 16px 18px; box-shadow:0 1px 2px rgba(20,30,50,.04);
+  }
+  .panel h2{font-size:1.06rem; margin:0 0 2px; display:flex; align-items:center; gap:8px}
+  .panel.inh{border-top:4px solid var(--bad)}
+  .panel.comp{border-top:4px solid var(--good)}
+  .tag{font-size:.72rem; font-weight:700; padding:2px 8px; border-radius:6px}
+  .tag.bad{background:var(--bad-bg); color:var(--bad)}
+  .tag.good{background:var(--good-bg); color:var(--good)}
+  .sub{color:var(--muted); font-size:.84rem; margin:2px 0 12px}
+  .stackbox{
+    background:#fafbfd; border:1px dashed var(--line); border-radius:10px;
+    min-height:184px; padding:12px; display:flex; flex-direction:column-reverse;
+    gap:6px; justify-content:flex-start; position:relative;
+  }
+  .toplabel{
+    position:absolute; top:8px; right:10px; font-size:.72rem; color:var(--muted);
+  }
+  .cell{
+    background:var(--accent-bg); border:1px solid #cfe0ff; color:#143a86;
+    border-radius:8px; padding:8px 10px; font-weight:700; text-align:center;
+    font-variant-numeric:tabular-nums; transition:transform .12s, background .2s;
+  }
+  .cell.top{background:#fff6d6; border-color:#f0d97a; color:#7a5b00}
+  .cell.flash-bad{animation:flashbad .6s}
+  @keyframes flashbad{0%{background:#ffd4d4}100%{}}
+  .empty{color:var(--muted); font-size:.85rem; text-align:center; margin:auto}
+  .btns{margin-top:12px}
+  .btns .row{display:flex; gap:7px; flex-wrap:wrap; margin-bottom:8px}
+  .rowlabel{font-size:.74rem; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin:6px 0 3px}
+  button{
+    font-family:inherit; font-size:.84rem; font-weight:600; cursor:pointer;
+    border-radius:8px; padding:7px 11px; border:1px solid var(--line); background:#fff;
+    color:var(--ink); transition:filter .12s, transform .05s;
+  }
+  button:hover{filter:brightness(.97)} button:active{transform:translateY(1px)}
+  button.good{background:var(--good-bg); border-color:#bfe6cf; color:var(--good)}
+  button.leak{background:var(--bad-bg); border-color:#f3c5c5; color:var(--bad)}
+  button.locked{background:#f4f5f7; color:#aab2bf; border-style:dashed; cursor:not-allowed}
+  .log{
+    margin-top:12px; background:var(--codebg); color:#d7e2f2; border-radius:10px;
+    padding:10px 12px; font-family:"Cascadia Code",Consolas,monospace; font-size:.8rem;
+    height:150px; overflow:auto; line-height:1.55;
+  }
+  .log .ok{color:#7ee0a3} .log .err{color:#ff9b9b} .log .warn{color:#ffd479} .log .dim{color:#7c8aa0}
+  .takeaway{
+    margin-top:24px; background:var(--accent-bg); border:1px solid #cfe0ff;
+    border-radius:12px; padding:16px 18px;
+  }
+  .takeaway b{color:#143a86}
+  .leaklist{
+    margin-top:10px; font-family:Consolas,monospace; font-size:.76rem; color:var(--muted);
+    word-spacing:2px; line-height:1.8;
+  }
+  .strike{text-decoration:line-through; opacity:.6}
+  footer{margin-top:30px; color:var(--muted); font-size:.8rem; text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🧱 Composition vs Inheritance — the Interface Leak</h1>
+  <div class="zh">组合 vs 继承 —— 接口泄露：继承把父类的全部方法都暴露出去，组合让你只暴露想要的。</div>
+
+  <p class="lede">
+    A <b>stack</b> should only allow <code>push</code> and <code>pop</code> (LIFO).
+    Inheriting <code>list</code> <b>leaks all ~40 list methods</b> — now a caller can
+    <code>sort</code>, <code>insert</code>, or <code>clear</code> your "stack". Composition lets you
+    expose <b>exactly</b> what you choose. <i>Click the buttons and watch.</i>
+  </p>
+  <div class="zh">栈只应允许 push / pop（后进先出）。继承 <code>list</code> 会泄露全部约 40 个列表方法——调用者可以 sort / insert / clear 你的"栈"。组合让你精确选择暴露什么。点击下面的按钮看效果。</div>
+
+  <div class="tally">
+    <span class="pill bad">🔴 <code>Stack(list)</code> exposes <b id="t-inh">40+</b> methods 暴露</span>
+    <span class="pill good">🟢 composed <code>Stack</code> exposes <b id="t-comp">2</b> methods 暴露</span>
+    <span class="pill">😱 illegal ops fired 非法操作: <b id="t-bad">0</b></span>
+  </div>
+
+  <div class="grid">
+
+    <!-- INHERITED -->
+    <div class="panel inh">
+      <h2>❌ <code>class Stack(list)</code> <span class="tag bad">INHERITED · 继承</span></h2>
+      <div class="sub">Every list method leaks in. The dangerous ones actually work — and corrupt the stack. 每个列表方法都泄露进来，危险操作真的会执行并破坏栈。</div>
+      <div class="stackbox" id="inh-box"><span class="toplabel">↑ top 栈顶</span></div>
+      <div class="btns">
+        <div class="rowlabel">what you meant to expose · 你本想暴露的</div>
+        <div class="row">
+          <button class="good" onclick="push('inh')">push(n)</button>
+          <button class="good" onclick="pop('inh')">pop()</button>
+        </div>
+        <div class="rowlabel">leaked from list · 从 list 泄露的（点一下试试）</div>
+        <div class="row">
+          <button class="leak" onclick="leak('inh','insert')">insert(0, 99)</button>
+          <button class="leak" onclick="leak('inh','sort')">sort()</button>
+          <button class="leak" onclick="leak('inh','reverse')">reverse()</button>
+          <button class="leak" onclick="leak('inh','setitem')">s[0] = 99</button>
+          <button class="leak" onclick="leak('inh','remove')">remove(bottom)</button>
+          <button class="leak" onclick="leak('inh','clear')">clear()</button>
+        </div>
+      </div>
+      <div class="log" id="inh-log"></div>
+    </div>
+
+    <!-- COMPOSED -->
+    <div class="panel comp">
+      <h2>✅ <code>class Stack:</code> holds a list <span class="tag good">COMPOSED · 组合</span></h2>
+      <div class="sub"><code>self._items = []</code> is private. Only the methods you wrote exist. 列表是私有的，只有你写的方法存在。</div>
+      <div class="stackbox" id="comp-box"><span class="toplabel">↑ top 栈顶</span></div>
+      <div class="btns">
+        <div class="rowlabel">the whole public interface · 全部公共接口</div>
+        <div class="row">
+          <button class="good" onclick="push('comp')">push(n)</button>
+          <button class="good" onclick="pop('comp')">pop()</button>
+        </div>
+        <div class="rowlabel">same list methods? · 同样的列表方法？</div>
+        <div class="row">
+          <button class="locked" onclick="locked('comp','insert')">insert(0, 99)</button>
+          <button class="locked" onclick="locked('comp','sort')">sort()</button>
+          <button class="locked" onclick="locked('comp','reverse')">reverse()</button>
+          <button class="locked" onclick="locked('comp','__setitem__')">s[0] = 99</button>
+          <button class="locked" onclick="locked('comp','remove')">remove()</button>
+          <button class="locked" onclick="locked('comp','clear')">clear()</button>
+        </div>
+      </div>
+      <div class="log" id="comp-log"></div>
+    </div>
+
+  </div>
+
+  <div class="takeaway">
+    <b>🔑 The rule, stated fairly.</b> Inheritance for genuine <i>is-a</i> subtypes (a <code>Manager</code>
+    <i>is an</i> <code>Employee</code>; framework bases like <code>nn.Module</code>). Composition for
+    <i>has-a</i> and assembling behaviour (a <code>Stack</code> <i>has a</i> list; a <code>Car</code>
+    <i>has an</i> engine). <b>A stack is not a kind of list</b> — it only wants to <i>use</i> one inside.
+    <div class="zh" style="margin-top:8px">规则公正地说：继承用于真正的 is-a 子类型（Manager 是 Employee；框架基类如 nn.Module）；组合用于 has-a 与行为组装（Stack 有一个 list；Car 有一个 engine）。栈不是一种列表——它只想在内部使用一个列表。</div>
+    <div class="leaklist">
+      methods a <code>Stack(list)</code> wrongly exposes ·栈本不该有的方法：
+      <span class="strike">append extend insert remove pop(i) sort reverse clear copy count index
+      __setitem__ __delitem__ __getitem__ __iadd__ __imul__ … (40+)</span>
+    </div>
+  </div>
+
+  <footer>Day 4 · Week 1 — interactive upgrade · composition over inheritance. Vanilla JS, no dependencies.</footer>
+</div>
+
+<script>
+  const state = { inh:[1,2,3], comp:[1,2,3] };
+  let badCount = 0;
+
+  function render(which){
+    const box = document.getElementById(which+'-box');
+    box.querySelectorAll('.cell,.empty').forEach(n=>n.remove());
+    const arr = state[which];
+    if(arr.length===0){
+      const e=document.createElement('div'); e.className='empty';
+      e.textContent='(empty stack · 空栈)'; box.appendChild(e); return;
+    }
+    arr.forEach((v,i)=>{
+      const c=document.createElement('div');
+      c.className='cell'+(i===arr.length-1?' top':'');
+      c.textContent=v; box.appendChild(c);
+    });
+  }
+  function flash(which){
+    const cells=document.querySelectorAll('#'+which+'-box .cell');
+    cells.forEach(c=>{c.classList.remove('flash-bad'); void c.offsetWidth; c.classList.add('flash-bad');});
+  }
+  function log(which, html, cls='dim'){
+    const el=document.getElementById(which+'-log');
+    const line=document.createElement('div');
+    line.className=cls; line.innerHTML=html;
+    el.appendChild(line); el.scrollTop=el.scrollHeight;
+  }
+
+  let counter = 9;
+  function push(which){
+    const n = ++counter;
+    state[which].push(n);
+    render(which);
+    log(which, '<span class="ok">push('+n+')</span>  → top is now '+n+'  ✓ LIFO', 'ok');
+  }
+  function pop(which){
+    const arr=state[which];
+    if(arr.length===0){ log(which,'pop() on empty → IndexError','err'); return; }
+    const v=arr.pop(); render(which);
+    log(which, '<span class="ok">pop()</span> → removed top '+v+'  ✓ LIFO', 'ok');
+  }
+
+  // INHERITED: the leaked methods actually mutate + break LIFO
+  function leak(which, op){
+    const arr=state[which];
+    badCount++; document.getElementById('t-bad').textContent=badCount;
+    let why='';
+    switch(op){
+      case 'insert': arr.splice(0,0,99); why='inserted 99 at the BOTTOM — a stack only adds at the top'; break;
+      case 'sort':   arr.sort((a,b)=>a-b); why='re-ordered every element — LIFO history destroyed'; break;
+      case 'reverse':arr.reverse(); why='flipped the stack — top and bottom swapped'; break;
+      case 'setitem':if(arr.length)arr[0]=99; why='overwrote an interior slot — bypassed push/pop entirely'; break;
+      case 'remove': if(arr.length)arr.splice(0,1); why='removed the BOTTOM element — you may only pop the top'; break;
+      case 'clear':  arr.length=0; why='wiped the whole stack at once — no controlled pop'; break;
+    }
+    render(which); flash(which);
+    log(which, '<span class="err">'+labelOf(op)+'</span> ran 😱 — '+why+'.', 'err');
+    log(which, '   ↳ it inherited from list, so Python happily allowed it.', 'warn');
+  }
+
+  // COMPOSED: same names don't exist on the object
+  function locked(which, name){
+    log(which, "<span class='err'>stack."+name+"(...)</span>", 'err');
+    log(which, "   ↳ AttributeError: 'Stack' object has no attribute '"+name+"'  ✅ blocked", 'ok');
+    log(which, "   ↳ you never exposed it — the list is private (self._items).", 'dim');
+  }
+
+  function labelOf(op){
+    return {insert:'insert(0, 99)',sort:'sort()',reverse:'reverse()',
+            setitem:'s[0] = 99',remove:'remove(bottom)',clear:'clear()'}[op];
+  }
+
+  render('inh'); render('comp');
+  log('inh','# a "stack" built by INHERITING list — try the red buttons','dim');
+  log('comp','# a "stack" built by COMPOSING a private list — red buttons throw','dim');
+</script>
+</body>
+</html>

@@ -78,3 +78,70 @@ one sentence why you didn't write `class Playlist(list)`.
 ---
 > ⏱️ Could you classify section B1 cold tomorrow? y/n → [`../learning-records/`](../learning-records/).
 > 🇨🇳 明天你能不看笔记完成 B1 的分类题吗？ y/n → [`../learning-records/`](../learning-records/)。
+
+
+""""""
+"""
+## Spaced Answer:
+S1. ABC guarantee there's no incomplete subclass,it will reject when the subclass instance
+S2. Because the hash became None when you defined __eq__ ,For immutable objects,you best to define __hash__;
+For mutable object,you best to accept __hash__ = None,and can't put your object into set or dict
+S3. it must return a new object,the same reason for hash changed,and the bad bad thing appear: the same hash value but not equal
+
+
+## A · Free recall Answer:
+the inheritance just like building a tower,the rest of them must all change when you change the fundmental;
+the composition just like LEGO or composite a bot,its easier to replace one part or test it
+
+
+## B · Concept questions Answer:
+1. SavingsAccount is a BankAccount; Car has an Engine; LogLevelError is a LogError; Stack has a list
+2. Stack(list) let the enclosing method or state exposed to the inheritor,but composing won't
+3. because local var is created before the init start,then every instance object point to a common list which the x point.
+When an instance object mutate the list,then the list of every other instance object from method f will change together
+4. why not =[],the same reason for Q3,the right way is x: list = field(default_factory = list)
+5. slots trades flexable to running speed for fixed states,its worth it when the data is very big.
+
+
+## C · Spot-the-bug Answer:
+the two seperate Cart() instances would share the same items list,it should be
+@dataclass
+class Cart:
+    items: list = field(default_factory = list)
+
+
+## E · Math (by hand) Answer:
+1. the shape is [[2,8],[1,12]]
+2. A X identity = A,so the answer is [[1,2],[3,4]] 
+3. they are not equal,A·B = [[2,1],[1,1]]  B·A = [[1,2],[1,2]]
+
+
+"""
+
+## D · Micro-build (blank file, 10 min)
+from dataclasses import dataclass, field
+from typing import Optional
+
+
+@dataclass
+class Song:
+    title: str
+    artist: str
+
+
+class Playlist:
+
+    def __init__(self):
+        self.lst: list[Song] = []
+
+    def __iter__(self):
+        for i in self.lst:
+            yield i
+
+    def add(self, title: str, artist: str) -> None:
+        self.lst.append(Song(title, artist))
+
+    def __len__(self):
+        return len(self.lst)
+
+###  Why not class Playlist(list)?  I just know it seems symple to use compose here.
