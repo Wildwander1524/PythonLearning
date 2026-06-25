@@ -1,0 +1,8 @@
+{
+    "editor.fontSize": 14,
+    "explorer.sortOrder": "type",
+    "python.analysis.autoImportCompletions": false,
+    "python.defaultInterpreterPath": "D:\\Code\\ANACONDA3\\python.exe",
+    "python-envs.defaultEnvManager": "ms-python.python:system",
+    "python-envs.defaultPackageManager": "ms-python.python:pip"
+}

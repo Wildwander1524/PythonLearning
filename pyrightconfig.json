@@ -1,0 +1,9 @@
+{
+  "//": "Point pyright at the BASE conda env (D:/ANACONDA, Python 3.13.9) so imports like pytest resolve and type-checks match the interpreter tests run in. Used by the grade-day skill's pyright gate.",
+  "pythonVersion": "3.13",
+  "venvPath": "D:/",
+  "venv": "ANACONDA",
+  "include": ["week01"],
+  "exclude": ["**/__pycache__", "**/.pytest_cache"],
+  "reportMissingImports": "warning"
+}
