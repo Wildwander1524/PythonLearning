@@ -106,8 +106,12 @@ own primary news/market sourcing."*
 - Baseline digest: `week01/day05_errors_context/LESSON.bilingual.md` §S4.
 - This eval: `progress/2026-06-25_context7-authority-eval.md`.
 
-## Next steps
-- [ ] User decides: adopt the scoped workflow change (context7 → library lessons only)?
-- [ ] If yes: add the rule to project `CLAUDE.md`; optionally expand W2D1 to the full /teach 4-file
-      set (LESSON/HOMEWORK/RECALL/SOLUTIONS) + DeepSeek bilingual.
-- [ ] Commit decision (W2D1 lesson + this eval are currently untracked).
+## Next steps / decisions (resolved 2026-06-25)
+- [x] **Adopt scoped workflow change** → YES. Rule written into project `CLAUDE.md`
+      ("Sourcing library/technical content — context7 is the primary source"); fixed a stale
+      progress-path line in the same edit.
+- [x] **Commit + push** → done. Commits `7685130` (context7 rule + W2D1 lesson + this eval) and
+      `73902bb` (Day-5 progress log); pushed — `main` in sync with `origin/main`.
+- [ ] **Expand W2D1 to full /teach 4-file set** → deferred (user: keep the lesson core as the
+      demonstrator; build the full day when Week 2 actually starts, 06-23 window).
+- [ ] When Week 2 begins: apply the new rule for real (context7-source the NumPy day, then pandas, etc.).
