@@ -1,6 +1,6 @@
 ---
 name: grade-day
-description: Grade a PythonLearning homework day against the full Definition-of-Done — pyright clean, pytest green in the dl conda env, spec-precision check — then update review-queue.md and misconceptions.md. Use when grading a dayNN homework submission.
+description: Grade a PythonLearning homework day against the full Definition-of-Done — pyright clean, pytest green in the base conda env (Python 3.13.9), spec-precision check — then update review-queue.md and misconceptions.md. Use when grading a dayNN homework submission.
 disable-model-invocation: true
 argument-hint: "which day folder, e.g. week01/day05_errors_context"
 ---
