@@ -36,4 +36,23 @@ machine-checked instead of eyeballed.
 - HTML lesson upgrades follow the `/teach` SKILL.md *Visualization Upgrades* section
   (`E:\Code\MyProjects\VSCode_Env\WorkFlow\skills\productivity\teach\SKILL.md`) — including consulting
   the **frontend-design** skill for visual direction.
-- Progress logs live in `E:\Code\ClaudeCode_Context\` (per global CLAUDE.md), not here.
+- Progress logs live in this project's **`progress/`** directory (per global CLAUDE.md, updated
+  2026-06-25 — the old `E:\Code\ClaudeCode_Context\` location is retired).
+
+## Sourcing library/technical content — context7 is the primary source
+> Added 2026-06-25 after a before/after authority eval
+> (`progress/2026-06-25_context7-authority-eval.md`): context7-grounded NumPy material scored ~100%
+> primary-source-cited vs ~0% for the parametric baseline.
+
+For any lesson or homework whose subject is a **library, framework, or API** — NumPy (Week 2)
+onward: pandas, scikit-learn, PyTorch, Hugging Face, LangChain/LlamaIndex, MATLAB toolboxes, etc. —
+the **primary source is the context7 MCP**:
+1. `resolve-library-id` (prefer a **High** Source-Reputation, high Benchmark source — usually the
+   official docs site), then `query-docs` for the specific topic;
+2. **cite the returned primary URLs inline** in the lesson (version-pinned, e.g. NumPy 2.4) and add
+   a Sources list. Do not assert library facts from parametric memory when context7 can source them.
+
+**Scope boundary:** context7 indexes *documentation, not news*. It is **not** a source for the
+**Weekly AI Industry Digest** (S4 frontier slot) — that keeps its own primary news/market sourcing
+(web fetch/search + the Friday cloud routine). This rule strengthens, and never overrides, the
+`/teach` principle *"never rely on parametric knowledge — cite high-trust sources."*
