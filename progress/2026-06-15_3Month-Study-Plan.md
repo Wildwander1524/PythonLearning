@@ -4,12 +4,63 @@
 - **Target role:** Industrial large-model (大模型) fine-tuning + Agent development
 - **Geography:** Phase 1 — China first-tier cities (Beijing / Shanghai / Guangzhou / Shenzhen); Phase 2 (long-term) — Germany, related field
 - **Plan window:** 2026-06-16 → 2026-09-12 (13 weeks; Week 1 starts Monday 2026-06-16)
-- **Cadence:** 6 days/week (Mon–Sat), Sunday off. **7 h theory + 3 h homework = 10 h/day**
-- **Created:** 2026-06-15  | **Last updated:** 2026-06-16  | **Status:** 🟢 Active — Week 1 in progress (D1 done)
+- **Cadence:** 6 days/week (Mon–Sat), Sunday off. **Default target now = 6 h focused learning + 2 h project/application buffer/day**; 10 h/day is an optional sprint ceiling, not the baseline.
+- **Created:** 2026-06-15  | **Last updated:** 2026-06-26  | **Status:** 🟢 Active — recalibrated to a portfolio-first plan; Week 1 Day 5 homework pending
 
 > This file is BOTH the study plan AND the live progress record. As you complete exercises,
 > send them to me and I update the tracking table + completion log below. See **§7 Default
 > Requirements** for the standing rules (completion updates + weekly frontier refresh).
+
+---
+
+## §0 — 2026-06-26 Recalibration: Evaluation & Revision Patch
+
+**Verdict:** The original plan has the right strategic direction (industrial LLM applications,
+RAG/Agents, PEFT/fine-tuning, production serving), but the old schedule tries to cover too many
+fields before producing enough proof. For a career-changer with no programming work experience,
+the strongest 13-week outcome is **3 credible portfolio artifacts + interview narrative**, not a
+survey of MATLAB, C++, ML, DL, Transformers, RAG, agents, edge multimodal, video understanding,
+vLLM, and TensorRT-LLM all at once.
+
+**Keep as core:**
+- Python engineering habits, Git, tests, pyright, notebook/script workflow.
+- NumPy/pandas/data cleaning, but tied to real data and written reports.
+- PyTorch + Hugging Face + PEFT/LoRA, but project-first rather than theory-first.
+- RAG + Agent development as the main target-role skill, with evaluation and observability.
+- vLLM/SGLang as practical serving options for the capstone.
+
+**Downgrade or defer:**
+- **MATLAB:** remove from the active 13-week plan. It may be useful in some engineering contexts,
+  but it does not strengthen the target 大模型应用/Agent portfolio enough to justify a full week now.
+- **C++:** move to a light "reading literacy" track only. Do not spend 2 weeks trying to look like a
+  C++ engineer; revisit C++ after the first AI role or for inference-engine specialization.
+- **TensorRT-LLM:** optional stretch only. It is valuable, but it is a hardware/deployment depth
+  topic; use it only after a vLLM/SGLang baseline exists.
+- **Edge multimodal and video understanding:** keep as elective showcase ideas, not required
+  milestones. The primary job-search proof should be text/document industrial AI first.
+
+**Add explicitly:**
+- Linux/CLI and deployment hygiene: `uv`/conda, Git branches, `pytest`, `pyright`, `.env`, logs,
+  FastAPI, Docker basics where useful.
+- Evaluation loops: train/validation/test, error analysis, RAG faithfulness/relevance/context metrics,
+  agent tool-call accuracy, latency/throughput notes.
+- Portfolio writing: every milestone ends with a README, demo script, failure log, and 3-5 resume
+  bullets in STAR/project-impact style.
+- EU/Germany readiness: basic AI Act/GDPR/trusted-AI awareness for industrial deployments, especially
+  logging, human oversight, documentation, and risk framing.
+
+**Portfolio milestones now drive the plan:**
+
+| Milestone | Target window | Must ship | Why it matters |
+|-----------|---------------|-----------|----------------|
+| **M1 — Python/data project** | by revised Week 4 | A tested Python package or notebook/script pair that cleans and analyzes a real industrial-ish dataset, with README + findings | Proves programming fundamentals, data literacy, Git, testing, and technical writing |
+| **M2 — Fine-tune + deploy** | by revised Week 8 | A small open model fine-tuned with PEFT/LoRA, evaluated with error analysis, served via FastAPI or local API | Proves the core LLM application loop beyond prompt demos |
+| **M3 — RAG + Agent system** | by revised Week 12 | RAG over technical docs + tool-using agent + eval harness + traces/logs | Directly matches 大模型应用/Agent job postings |
+| **M4 — Serving/portfolio polish** | final week | vLLM or SGLang serving benchmark, optional TensorRT-LLM stretch, polished README/demo/resume bullets | Turns learning into interview-ready evidence |
+
+**Conflict rule:** where this §0 conflicts with the older daily tables below, **§0 and the revised
+§3/§5 milestone plan win**. The Month 1 tables remain useful as already-authored `/teach` lesson
+material, but future expansion should follow the project gates above.
 
 ---
 
@@ -51,13 +102,14 @@ medicine, agrifood — consistent with the ranking above.*
 
 | Direction | Mainstream? | Assessment | How I weight it in your plan |
 |-----------|-------------|------------|------------------------------|
-| **3. Inference acceleration — vLLM / TensorRT-LLM** | ✅ **Yes — mainstream / near-required** | Explicitly listed among core skills for 2026 LLM-application roles ("production deployment incl. vLLM/TensorRT-LLM acceleration + vector-DB integration"). PagedAttention/vLLM and TensorRT-LLM are the default production-serving stack. | **Highest priority.** Core of the frontier slot from Week 9; introduced conceptually earlier. |
-| **1. Edge-side multimodal deployment — MobileCLIP / TinyGPT-V** | 🟡 **Niche / bonus (growing)** | Not a universal requirement for mainstream 大模型应用 roles. Strong differentiator at terminal/IoT/automotive-cockpit teams (小米, 荣耀, vivo, OPPO, 地平线). Strategically aligned with your *industrial/edge* focus. | **Secondary, but strategically core for YOU** given industrial/edge target. Hands-on in Weeks 9–13. |
-| **2. Video understanding — Video-LLaMA / TimeSformer** | 🟡 **Emerging / sector-specific** | Multimodal is increasingly mainstream; video-specific still emerging vs. image+text. Valued in short-video/content (字节, 快手), security/surveillance, autonomous driving. | **Tertiary / elective.** Conceptual coverage + one mini-project; deepen only if targeting content/AV sectors. |
+| **3. Inference serving — vLLM / SGLang / TensorRT-LLM** | ✅ **Yes — mainstream / valuable** | Production LLM roles increasingly expect awareness of high-throughput serving, batching, KV-cache/memory tradeoffs, and OpenAI-compatible serving APIs. | **Required as a measured capstone skill, not an early deep dive.** vLLM or SGLang baseline required; TensorRT-LLM optional stretch. |
+| **1. Edge-side multimodal deployment — MobileCLIP / TinyGPT-V-class** | 🟡 **Niche / bonus (growing)** | Not a universal requirement for mainstream 大模型应用 roles. Strong differentiator at terminal/IoT/automotive-cockpit teams (小米, 荣耀, vivo, OPPO, 地平线). Strategically aligned with your *industrial/edge* focus. | **Elective showcase.** Keep as a later branch only after M2/M3 are healthy. |
+| **2. Video understanding — Video-LLaMA / TimeSformer-class** | 🟡 **Emerging / sector-specific** | Multimodal is increasingly mainstream; video-specific still emerging vs. image+text. Valued in short-video/content (字节, 快手), security/surveillance, autonomous driving. | **Elective.** Do not block core Agent/RAG/fine-tune portfolio work. |
 
-**Net takeaway:** Make **vLLM/TensorRT-LLM inference deployment** a non-negotiable skill. Treat
-**edge multimodal** as your *differentiator* (fits industrial/Germany direction). Treat **video
-understanding** as an *elective* you can showcase with one project.
+**2026-06-26 recalibrated takeaway:** Make **RAG/Agent + PEFT/LoRA + evaluation + API deployment**
+the non-negotiable center. Treat **vLLM or SGLang serving** as the final measured production skill.
+Treat **TensorRT-LLM, edge multimodal, and video understanding** as stretch/elective topics that
+must not crowd out portfolio evidence.
 
 **General market note (both cities + base reality):** 2025–2026 大模型应用 roles cluster on:
 LangChain/LlamaIndex for Agent/RAG pipelines · PEFT (LoRA/QLoRA) fine-tuning of open models
@@ -74,53 +126,60 @@ targets it.
 
 | Slot | Duration | Purpose |
 |------|----------|---------|
-| **S1 — Core Theory A** | 2 h | Primary subject of the day |
-| **S2 — Core Theory B** | 2 h | Primary subject continued / second subject |
-| **S3 — Math** | 1 h | The week's math topic (focused) |
-| **S4 — Frontier / Current Directions** | 2 h | Rotating cutting-edge content (the "2-hour daily slot"). **Friday S4 = Weekly AI Industry Digest** |
-| **Homework** | 3 h | Daily coding/practice assignment (listed per day) |
+| **S1 — Core Concept** | 2 h | The day's primary concept, sourced from authoritative material |
+| **S2 — Guided Practice** | 2 h | Worked examples, small drills, or code reading tied to the concept |
+| **S3 — Math / Recall** | 1 h | Focused math plus cold recall / spaced review |
+| **S4 — Frontier / Docs / Industry** | 1 h | Current tools, official docs, or Friday AI Industry Digest |
+| **Project / Homework Block** | 2 h | Code, tests, README, eval notes, or milestone artifact work |
 
-**Totals:** Theory = S1+S2+S3+S4 = 7 h · Homework = 3 h · **= 10 h/day**.
-Suggested clock: 08:30–10:30 (S1) · 10:45–12:45 (S2) · 14:00–15:00 (S3) · 15:15–17:15 (S4) ·
-19:00–22:00 (Homework). Adjust to your chronotype; keep the block sizes.
+**Default total:** 6 h focused learning + 2 h project/application = **8 h/day**.
+**Optional sprint ceiling:** add up to 2 h for catch-up or deep project work, but do not make 10 h/day
+the assumed baseline.
+
+Suggested clock: 08:30–10:30 (S1) · 10:45–12:45 (S2) · 14:00–15:00 (S3) · 15:15–16:15 (S4) ·
+19:00–21:00 (Project/Homework). Adjust to your chronotype; keep the block sizes.
 
 ### Frontier Track (the rotating S4 "most current directions" slot)
-- **Phase 1 — Orientation & Tooling (W1–4):** Build conceptual literacy + working environment.
-  Skim landmark material on the 3 directions; set up Python/conda, Git, CUDA-ready PyTorch,
-  Docker; learn to read the AI news landscape. *No heavy coding yet — you're building the runway.*
-- **Phase 2 — Applied Foundations (W5–8):** As ML/DL knowledge lands, do guided hands-on — run a
-  CLIP/MobileCLIP demo, dissect attention behind Video-LLaMA/TimeSformer, benchmark a small model's
-  inference latency/throughput.
-- **Phase 3 — Specialization (W9–13):** Deploy an edge multimodal model; build a small
-  video-understanding pipeline; serve an LLM with **vLLM** then accelerate with **TensorRT-LLM**;
-  fold all three into the capstone.
-- **Every Friday:** S4 = **Weekly AI Industry Digest** — I refresh this with the week's real
-  developments and re-tune the upcoming week's frontier content (see §7).
+- **R1-R4:** Tooling, official docs literacy, Hugging Face orientation, embeddings/vector DB concepts.
+- **R5-R8:** PyTorch/Transformers/PEFT applied to the fine-tune+API milestone.
+- **R9-R12:** RAG, Agent workflow patterns, evaluation, tracing/logging, and reliability.
+- **R13:** vLLM or SGLang serving benchmark; TensorRT-LLM only if the baseline is already healthy.
+- **Every Friday:** S4 = **Weekly AI Industry Digest** with direct source links; use it to re-tune
+  upcoming S4 content without derailing the current milestone.
 
 ---
 
-## §3 — 13-Week Macro Plan
+## §3 — Revised 13-Week Macro Plan (Portfolio-First)
 
-| Month | Week | Dates (Mon–Sat) | Core curriculum | Math | Frontier phase |
-|-------|------|-----------------|-----------------|------|----------------|
-| **1** | 1 | 06-16 → 06-21 | Python OOP deep-dive | Linear Algebra I | P1 Orientation |
-| | 2 | 06-23 → 06-28 | NumPy | Linear Algebra II + Calculus I | P1 |
-| | 3 | 06-30 → 07-05 | Pandas | Calculus II + Probability I | P1 |
-| | 4 | 07-07 → 07-12 | MATLAB + C++ basics I | Discrete Math I | P1 |
-| **2** | 5 | 07-14 → 07-19 | C++ basics II (OOP, STL) | Probability II | P2 Applied |
-| | 6 | 07-21 → 07-26 | Machine Learning I (supervised) | Linear Algebra III (SVD/PCA, matrix calc) | P2 |
-| | 7 | 07-28 → 08-02 | Machine Learning II (trees, ensembles, SVM, clustering, eval) | Optimization / Calculus III | P2 |
-| | 8 | 08-04 → 08-09 | Deep Learning I (MLP, backprop, PyTorch) | Discrete Math II + Number Theory | P2 |
-| **3** | 9 | 08-11 → 08-16 | Deep Learning II (CNN, RNN, regularization, training) | Applied stats review | P3 Specialization |
-| | 10 | 08-18 → 08-23 | Deep Learning III → Transformers + NLP I | Math consolidation | P3 |
-| | 11 | 08-25 → 08-30 | NLP II (pretrained models, fine-tuning, PEFT/LoRA) + LLM basics | — | P3 |
-| | 12 | 09-01 → 09-06 | Agent development (LangChain/LlamaIndex, tools, planning) + RAG I | — | P3 |
-| | 13 | 09-08 → 09-12 | RAG II (advanced retrieval, eval) + **Capstone** | — | P3 (integrate all) |
+> **Calendar note (2026-06-26):** The learner is behind the original date grid because Week 1 is being
+> taught in a deeper `/teach` format. From here, the plan is **gate-based**: do not compress the
+> portfolio projects to preserve a calendar illusion. If a gate slips, move the target date.
 
-> **Detail policy:** Month 1 (Weeks 1–4) is written out block-by-block below. Months 2–3 are written
-> at day-objective + session-topic + homework granularity and will be expanded to full block detail
-> as we reach each week (and refreshed by the weekly frontier update). This is intentional: later
-> weeks depend on your actual pace, and the frontier slot changes with live AI news.
+| Phase | Target window | Core learning | Math/stat focus | Frontier/production focus | Gate to pass |
+|-------|---------------|---------------|-----------------|---------------------------|--------------|
+| **Recovery + Week 1 close** | 06-26 → 06-29 | Finish W1 D5 homework + D6 consolidation; clean progress/status | LA I recap | None unless time remains | Day 5 homework graded; Day 6 mini-project scoped |
+| **P1 — Python/data foundation** | 06-30 → 07-19 | Python engineering, NumPy, pandas, notebooks/scripts, testing, Git | Linear algebra, derivatives, probability basics | Hugging Face orientation; embeddings/vector DB concepts | **M1 shipped:** real dataset analysis + README + tests/checks |
+| **P2 — ML/DL + fine-tune/deploy** | 07-20 → 08-15 | scikit-learn basics, PyTorch fundamentals, Transformers, PEFT/LoRA | Metrics, optimization, error analysis | FastAPI inference service; model cards; experiment logs | **M2 shipped:** LoRA fine-tune + evaluation + API |
+| **P3 — RAG + Agent core** | 08-17 → 09-05 | RAG pipeline, chunking/retrieval/reranking, tool-calling agents, LangGraph/LlamaIndex patterns | Retrieval metrics, faithfulness, latency/quality tradeoffs | RAGAS-style eval, tracing/logging, prompt/version control | **M3 shipped:** industrial-doc RAG + tool agent + eval report |
+| **P4 — Serving + portfolio polish** | 09-07 → 09-12 | Capstone integration, README/demo/resume bullets, mock interviews | Metrics consolidation | vLLM or SGLang benchmark; TensorRT-LLM optional stretch | **M4 shipped:** public portfolio package + interview script |
+
+### Priority Stack After Recalibration
+
+| Priority | Skill/theme | Decision |
+|----------|-------------|----------|
+| P0 | Python, Git, tests, pyright, CLI, project structure | Non-negotiable; every milestone must use it |
+| P0 | RAG + Agent + evaluation | Main job-search target; gets the most project depth |
+| P0 | PEFT/LoRA + model evaluation + API deployment | Required for "fine-tuning + application" credibility |
+| P1 | vLLM or SGLang serving | Use in final project as a measured production-serving comparison |
+| P1 | Docker/Linux basics | Add as needed for reproducible demos, not as a separate theory week |
+| P2 | TensorRT-LLM | Stretch only after a working vLLM/SGLang baseline |
+| P2 | Edge multimodal/video understanding | Elective showcase only; do not block core portfolio |
+| Deferred | MATLAB | Removed from active 13-week plan |
+| Deferred | C++ | Reading-literacy only; no standalone 2-week block |
+
+> **Detail policy:** Month 1's existing daily tables remain as authored learning material. Future
+> weeks should be expanded only when the next milestone is near, using Context7 for library/API
+> sources and DeepWiki for reading complex repos such as `vllm`, `transformers`, or `sglang`.
 
 ---
 
@@ -165,25 +224,61 @@ integrals & partial derivatives; probability foundations.
 | **D5 Fri** | Real workflow | EDA workflow on a real dataset | Performance, `category` dtype, method chaining | Conditional probability, Bayes' theorem | **Weekly AI Digest #3** + re-tune | Full EDA notebook on a chosen dataset (push to GitHub) |
 | **D6 Sat** | Consolidate + mini-project | Review | Mini-project | Prob-I recap + Bayes problems | Catch-up | **Mini-project:** end-to-end data analysis (clean→group→visualize→insights) write-up |
 
-### Week 4 (07-07 → 07-12) — MATLAB + C++ basics I + Discrete Math I
-**Weekly goal:** MATLAB for numerical/matrix work + plotting; first C++ (compile, types, control flow,
-functions, pointers intro); discrete-math foundations (logic, sets, proof).
+### Week 4 / R4 (07-07 → 07-12 target) — M1 Data Portfolio Polish + ML Bridge
+**Weekly goal:** Turn NumPy/pandas work into the first portfolio artifact: a reproducible data
+analysis project with clean code, checks, README, findings, and resume bullets. MATLAB is removed;
+C++ is deferred to reading literacy after the core portfolio is healthy.
 
-| Day | Objective | S1 (2h) | S2 (2h) | S3 Math (1h) | S4 Frontier (2h) | Homework (3h) |
-|-----|-----------|---------|---------|--------------|------------------|----------------|
-| **D1 Mon** | MATLAB basics | Environment, variables, matrices, `:` operator | Element-wise vs matrix ops, indexing | Propositional logic, truth tables | Compare MATLAB vs NumPy for matrix work (notes) | MATLAB: implement matrix ops + solve a linear system |
-| **D2 Tue** | MATLAB scripts & plots | Scripts, functions, control flow | 2D/3D plotting, `plot/surf`, subplots | Predicate logic, quantifiers | Read: GPU vs CPU for AI compute (concept) | MATLAB: plot functions + a small simulation |
-| **D3 Wed** | C++ entry | Compile/build, `main`, types, I/O (`cin/cout`) | Control flow, loops, functions, scope | Sets, operations, Venn, cardinality | Toolchain: install g++/CMake; "hello world" | C++: temperature converter + FizzBuzz + factorial |
-| **D4 Thu** | C++ functions & memory | Functions, pass-by-value/reference, overloading | Pointers & references intro; stack vs heap | Proof techniques: direct, contradiction, induction | Read: why C++ matters for inference engines | C++: array stats (min/max/mean) using functions |
-| **D5 Fri** | C++ arrays & strings | Arrays, `std::vector` intro, `std::string` | Structs, basic file I/O | Relations, functions (math), mappings | **Weekly AI Digest #4** + Month-1 retro | C++: word-count program reading from file |
-| **D6 Sat** | Month-1 capstone | Review all of Month 1 | Capstone build | Discrete-I recap + induction proofs | Plan Month 2; env check for ML | **Month-1 capstone:** data pipeline — Python(OOP)→NumPy→Pandas analysis, reproduced in MATLAB for one matrix step; README + push |
+| Day | Objective | S1 (2h) | S2 (2h) | S3 Math/Recall (1h) | S4 Frontier/Docs (1h) | Project/Homework (2h) |
+|-----|-----------|---------|---------|----------------------|------------------------|------------------------|
+| **D1 Mon** | Project framing | Pick industrial-ish dataset; define 5 analysis questions | Repo structure, data dictionary, reproducibility checklist | Probability recap: events, conditional probability | Dataset provenance + licensing notes | Create project skeleton + first data profile |
+| **D2 Tue** | Cleaning pipeline | Missing values, types, outliers, duplicate rules | Script/notebook split; repeatable cleaning | Distributions, mean/variance, z-score intuition | Read model/data-card examples | Build `clean_data.py` or notebook section + checks |
+| **D3 Wed** | Analysis depth | Groupby/joins/time windows; visualization choices | Turn charts into claims with evidence | Correlation vs causation; leakage awareness | Embeddings/vector DB concept recap | Draft findings with plots + caveats |
+| **D4 Thu** | Code quality | Tests/checks for data assumptions; pyright where applicable | README structure: problem, data, method, findings, limits | Metric selection and baseline thinking | Hugging Face datasets tour | Clean repo, run checks, write README first draft |
+| **D5 Fri** | Portfolio packaging | Failure log: what broke, what changed, what remains | Resume bullets in STAR/project-impact style | Month-1 math recap | **Weekly AI Digest #4** + M1 relevance check | Polish README + prepare short demo script |
+| **D6 Sat** | M1 gate review | Final project review against M1 rubric | Retrospective + next-phase setup | Cold recall from Weeks 1-3 | Plan R5 ML baseline dataset/task | **Ship M1:** reproducible analysis + README + demo notes |
 
 ---
 
-## §5 — MONTHS 2–3 (Weeks 5–13): day-level plan
+## §5 — MONTHS 2–3 (Weeks 5–13): revised milestone plan
 
-> Block-by-block detail for each week will be expanded when we reach it. Each day still = the §2
-> template (S1/S2/S3 core + S4 frontier 2h + 3h homework).
+> Block-by-block detail for each week will be expanded when the next milestone is near. Each day
+> still uses the §2 rhythm, but the standing rule is now: **project artifact first, theory in service
+> of the artifact**. The older subject-tour outline below is archived after this revised plan and is
+> superseded where conflicts exist.
+
+### Revised execution map
+
+| Revised week | Focus | Build target | Daily emphasis |
+|--------------|-------|--------------|----------------|
+| **R1 — Finish Week 1** | D5/D6 closeout | `logkit` FileLogger + Week-1 mini-project/readme cleanup | Cold recall, homework grading, pyright/pytest, progress sync |
+| **R2 — NumPy + data project start** | Array thinking, vectorization, notebook hygiene | Dataset profile + first clean notebook/script | Context7-sourced NumPy; math = matrix ops + derivatives |
+| **R3 — pandas + analysis report** | Cleaning, joins, groupby, time series/basic viz | Full EDA report on industrial-ish data | Error log, method chaining, data-quality notes |
+| **R4 — M1 polish** | Turn analysis into portfolio artifact | **M1:** cleaned repo, README, findings, reproducibility notes | Resume bullets + short demo script |
+| **R5 — ML fundamentals** | scikit-learn, metrics, splits, baselines | Baseline classifier/regressor + error analysis | Metrics > algorithm zoo; avoid deep SVM/tree theory |
+| **R6 — PyTorch fundamentals** | tensors, autograd, `nn.Module`, training loop | Small PyTorch model with tracked experiments | Training loop, overfitting, debugging |
+| **R7 — Transformers + PEFT** | tokenization, pretrained models, LoRA/QLoRA | Domain text dataset + first LoRA run | Hugging Face, PEFT, eval set, model card notes |
+| **R8 — M2 deploy** | API + evaluation + packaging | **M2:** LoRA fine-tune served via FastAPI/local API | Latency, error cases, README, demo |
+| **R9 — RAG foundations** | embeddings, chunking, vector DB, retrieval | Document ingest + baseline RAG Q&A | Retrieval quality, source attribution, failure cases |
+| **R10 — RAG evaluation** | reranking, query rewrite, eval harness | RAG quality report with test questions | RAGAS-style metrics, faithfulness/relevance |
+| **R11 — Agent workflows** | tool calling, state, planning, guardrails | Tool-using agent over the RAG system | LangGraph/LlamaIndex patterns; logs/traces |
+| **R12 — M3 integration** | Industrial assistant | **M3:** RAG + tool agent + eval report | Reliability, observability, risk notes |
+| **R13 — M4 polish/serving** | Portfolio + serving comparison | vLLM or SGLang benchmark; optional TensorRT-LLM stretch | README, demo video, interview stories |
+
+### Revised frontier rules for Months 2-3
+
+- **Friday S4 remains the Weekly AI Industry Digest**, but digest claims must carry direct source
+  links. If the cloud routine fails, produce the digest manually before changing next week's S4.
+- **vLLM/SGLang:** teach as "serve and measure" in R13, with a small baseline comparison against
+  Hugging Face/FastAPI. Do not deep-dive scheduler/KV-cache internals unless the capstone is already
+  healthy.
+- **TensorRT-LLM:** optional stretch only; use if GPU/tooling is ready and the baseline deployment is
+  complete.
+- **Edge multimodal/video:** optional single-demo branch after M3, not a blocker.
+- **AI governance:** add one lightweight section to M2/M3 READMEs covering data provenance, privacy,
+  eval limits, human oversight, and deployment risk.
+
+### Archived original outline (superseded by the revised execution map above)
 
 ### Week 5 (07-14 → 07-19) — C++ II (OOP, STL) + Probability II
 **Goal:** C++ classes, RAII, STL containers/algorithms; random variables & distributions.
@@ -288,26 +383,34 @@ train/val/test, scikit-learn workflow.
 
 **Legend:** ☐ not started · 🔄 in progress · ✅ done (exercises reviewed) · ⏭️ skipped/deferred
 
-### Week-level status
-| Week | Theme | Status | Notes |
+### Revised gate-level status
+| Gate | Theme | Status | Notes |
 |------|-------|--------|-------|
-| 1 | Python OOP + LA I | 🔄 | D1 done (9/10 tests); D2–D6 materials + Digest #1 issued |
-| 2 | NumPy + LA II/Calc I | ☐ | |
-| 3 | Pandas + Calc II/Prob I | ☐ | |
-| 4 | MATLAB + C++ I + Discrete I | ☐ | |
-| 5 | C++ II + Prob II | ☐ | |
-| 6 | ML I + LA III | ☐ | |
-| 7 | ML II + Opt/Calc III | ☐ | |
-| 8 | DL I + Discrete II + Num. Theory | ☐ | |
-| 9 | DL II + vLLM serving | ☐ | |
-| 10 | Transformers + NLP I + TensorRT-LLM | ☐ | |
-| 11 | NLP II + PEFT/LoRA + edge multimodal | ☐ | |
-| 12 | Agent + RAG I + video understanding | ☐ | |
-| 13 | RAG II + Capstone | ☐ | |
+| R1 | Finish Week 1 + close D5/D6 | 🔄 | D4 fixed/graded; D5 lesson taught; D5 homework pending; D6 still to scope |
+| R2 | NumPy + data project start | ☐ | W2D1 Context7-sourced demonstrator lesson exists; full 4-file `/teach` set deferred |
+| R3 | pandas + analysis report | ☐ | |
+| R4 / M1 | Python/data portfolio artifact | ☐ | Must ship README + reproducible analysis + resume bullets |
+| R5 | ML fundamentals | ☐ | Metrics/error analysis > broad algorithm survey |
+| R6 | PyTorch fundamentals | ☐ | |
+| R7 | Transformers + PEFT | ☐ | |
+| R8 / M2 | LoRA fine-tune + API deployment | ☐ | |
+| R9 | RAG foundations | ☐ | |
+| R10 | RAG evaluation | ☐ | |
+| R11 | Agent workflows | ☐ | |
+| R12 / M3 | Industrial RAG + tool agent | ☐ | |
+| R13 / M4 | Serving benchmark + portfolio polish | ☐ | vLLM or SGLang required; TensorRT-LLM optional stretch |
 
 ### Completion log (newest first)
 *(Each time you send completed exercises, I append a dated entry here: what you did, what was
 correct, what to fix, and any pace adjustment.)*
+- **2026-06-26** — **3-month plan evaluated and recalibrated.** Updated the plan from a
+  subject-tour schedule into a portfolio-first roadmap with four gates: **M1 data project → M2
+  LoRA fine-tune + API → M3 industrial RAG + tool agent → M4 serving benchmark + portfolio polish**.
+  Key decisions: make 6h focused learning + 2h project buffer the baseline; remove MATLAB from the
+  active 13-week plan; downgrade C++ to reading literacy; keep vLLM/SGLang as measured serving
+  skills; make TensorRT-LLM optional; keep edge multimodal/video as elective showcases only. Added
+  explicit evaluation/governance/readme/resume-bullet requirements. Current next step remains:
+  **finish Week-1 Day-5 `logkit` homework, grade with `--gate-tests`, then scope D6 consolidation.**
 - **2026-06-18** — **Week-1 materials redesigned to the `/teach` standard** (user request). Built the
   week shell (`MISSION.md` / `RESOURCES.md` / `learning-records/` / `README.md`) + all 6 days ×
   `LESSON`+`HOMEWORK`+`RECALL`+`SOLUTIONS`, calibrated to the D1–D2 submissions and grounded in
@@ -330,13 +433,14 @@ These are now the permanent operating rules for this study plan. They apply ever
    - adjust upcoming pace/difficulty if you're ahead or behind,
    - commit & push the updated record so you can track it on GitHub.
 
-2. **Weekly frontier refresh (the "2-hour daily slot").** Each week I retrieve the latest AI-industry
-   developments and **re-tune the S4 frontier content** for the coming week — keeping it pointed at
-   the *currently* most relevant directions, with standing emphasis on:
-   - **vLLM / TensorRT-LLM inference acceleration** (mainstream — top priority),
-   - **edge-side multimodal deployment** (your industrial/Germany differentiator),
-   - **video understanding** (elective showcase),
-   - plus any newly-hot direction the week's news surfaces.
+2. **Weekly frontier refresh (the "S4 current directions" slot).** Each week I retrieve the latest
+   AI-industry developments and **re-tune the S4 frontier content** for the coming week — keeping it
+   pointed at the next portfolio gate, with standing emphasis on:
+   - **RAG / Agent reliability / evaluation** (top priority for the target role),
+   - **PEFT/LoRA and model evaluation** (core fine-tuning proof),
+   - **vLLM or SGLang serving** (required in the final benchmark),
+   - **TensorRT-LLM, edge multimodal, and video understanding** only as stretch/elective branches,
+   - plus any newly-hot direction the week's news surfaces, if it helps the next milestone ship.
    The refresh lands as the **Friday "Weekly AI Industry Digest #N"** entry and updates the next
    week's S4 cells.
    - ✅ *Automation (live):* A scheduled cloud routine now generates the digest automatically every
@@ -372,6 +476,13 @@ These are now the permanent operating rules for this study plan. They apply ever
    assumes the **Markdown** teaching approach; for any **other format** (e.g. interactive HTML via
    `/teach`), confirm the choice first.
 
+7. **Portfolio-gate discipline (adopted 2026-06-26).** Future planning is milestone-first:
+   **M1 data project → M2 fine-tune+API → M3 RAG+Agent → M4 serving/portfolio polish**. A topic is
+   added only if it helps the next gate ship. Every milestone must produce: working code, tests or
+   checks, README, failure/error-analysis log, evaluation notes, and 3-5 resume/interview bullets.
+   If schedule pressure appears, defer lower-priority topics (TensorRT-LLM, edge multimodal, video,
+   C++ reading) rather than reducing project evidence.
+
 ---
 
 ## §8 — Sources
@@ -387,3 +498,12 @@ These are now the permanent operating rules for this study plan. They apply ever
 - [知乎 — 2026 大模型(LLM)面试题库](https://zhuanlan.zhihu.com/p/1981387722473116577)
 - [知乎 — 主流大模型推理部署框架 (vLLM/TensorRT-LLM/SGLang)](https://zhuanlan.zhihu.com/p/1937266323156607848)
 - [腾讯云 — 2026 大模型与多模态部署四大热门框架](https://cloud.tencent.com/developer/article/2649716)
+- **2026-06-26 recalibration source anchors**
+  - [vLLM official docs](https://docs.vllm.ai/)
+  - [SGLang official docs](https://docs.sglang.ai/)
+  - [NVIDIA TensorRT-LLM official docs](https://nvidia.github.io/TensorRT-LLM/)
+  - [LangGraph official overview](https://docs.langchain.com/oss/python/langgraph/overview)
+  - [RAGAS official docs](https://docs.ragas.io/en/stable/)
+  - [European Commission — AI regulatory framework / AI Act](https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai)
+  - [GTAI — Artificial Intelligence in Germany](https://www.gtai.de/en/invest/industries/digital-economy/artificial-intelligence)
+  - [Qwen3 official release blog](https://qwenlm.github.io/blog/qwen3/)
