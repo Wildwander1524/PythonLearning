@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 5 · Errors, EAFP & Context Managers — the Runtime Tracer</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#1b232f; --muted:#6b7686; --line:#e4e8ef;
+    --ok:#1c8a4e;  --ok-bg:#e9f7ef;  --ok-ln:#bfe6cf;
+    --fin:#b0700f; --fin-bg:#fdf3e1; --fin-ln:#f0d79a;   /* amber = ALWAYS runs */
+    --err:#c92a2a; --err-bg:#fdecec; --err-ln:#f3c5c5;
+    --accent:#5b4dd1; --accent-bg:#eeecff; --accent-ln:#cfc7f4; /* indigo = control flow / CM */
+    --codebg:#0d1726; --codeink:#d7e2f2;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Segoe UI",system-ui,-apple-system,"Microsoft YaHei",sans-serif;
+    line-height:1.5; padding:30px 18px 70px;
+  }
+  .wrap{max-width:1060px; margin:0 auto}
+  code,.mono{font-family:"Cascadia Code",Consolas,"SF Mono",monospace}
+  h1{font-size:1.55rem; margin:0 0 4px; letter-spacing:-.01em}
+  h2{font-size:1.14rem; margin:0 0 3px; display:flex; align-items:center; gap:9px}
+  .eyebrow{font-size:.72rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--accent)}
+  .zh{color:var(--muted); font-size:.92rem; margin-top:3px}
+  .lede{margin:12px 0 8px; font-size:1rem}
+  .lede code,p code,li code{background:#eef1f6; padding:1px 6px; border-radius:5px; font-size:.88em}
+  .meta{color:var(--muted); font-size:.85rem; margin:2px 0 18px}
+
+  section{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:20px 22px 22px; margin:22px 0; box-shadow:0 1px 2px rgba(20,30,50,.04);
+  }
+  section > .head{margin-bottom:14px}
+  .twocol{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+  @media(max-width:820px){.twocol{grid-template-columns:1fr}}
+
+  /* code blocks with steppable lines */
+  .code{
+    background:var(--codebg); color:var(--codeink); border-radius:11px;
+    padding:12px 4px 12px 0; font-family:"Cascadia Code",Consolas,monospace;
+    font-size:.83rem; line-height:1.0; overflow:auto;
+  }
+  .ln{
+    display:flex; gap:10px; padding:5px 12px 5px 10px; border-left:3px solid transparent;
+    white-space:pre; transition:background .15s, border-color .15s, opacity .15s;
+  }
+  .ln .g{color:#7c8aa0; user-select:none; min-width:1.4em; text-align:right}
+  .ln.active{background:#1b2c46; border-left-color:#8fa6ff}
+  .ln.ran{background:#102036}
+  .ln.skip{opacity:.34}
+  .ln.ran-ok{border-left-color:var(--ok)}
+  .ln.ran-err{border-left-color:var(--err)}
+  .ln.ran-fin{border-left-color:var(--fin)}
+  .tok-kw{color:#c792ea} .tok-fn{color:#82aaff} .tok-cm{color:#5f7a9b} .tok-str{color:#c3e88d}
+
+  /* console */
+  .console{
+    background:#0a1320; color:#cdd8e8; border-radius:11px; margin-top:12px;
+    padding:11px 13px; font-family:Consolas,monospace; font-size:.79rem;
+    min-height:120px; max-height:230px; overflow:auto; line-height:1.6;
+  }
+  .console .ok{color:#86e6aa} .console .err{color:#ff9b9b} .console .fin{color:#ffce85}
+  .console .dim{color:#7c8aa0} .console .acc{color:#b3a9ff} .console b{color:#fff}
+
+  /* controls */
+  .ctl{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:12px 0 4px}
+  .ctl .lab{font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-right:2px}
+  button{
+    font-family:inherit; font-size:.83rem; font-weight:600; cursor:pointer; border-radius:9px;
+    padding:7px 13px; border:1px solid var(--line); background:#fff; color:var(--ink);
+    transition:filter .12s, transform .05s, background .15s, border-color .15s;
+  }
+  button:hover{filter:brightness(.97)} button:active{transform:translateY(1px)}
+  button.pri{background:var(--accent); border-color:var(--accent); color:#fff}
+  button.ghost{background:#f4f5f8}
+  .seg{display:inline-flex; border:1px solid var(--line); border-radius:9px; overflow:hidden}
+  .seg button{border:0; border-radius:0; background:#fff}
+  .seg button.on{background:var(--accent-bg); color:#3a2fb0}
+  .seg.ok button.on{background:var(--ok-bg); color:var(--ok)}
+  .seg.err button.on{background:var(--err-bg); color:var(--err)}
+
+  /* block badges */
+  .blocks{display:flex; gap:7px; flex-wrap:wrap; margin:12px 0 2px}
+  .bb{font-size:.74rem; font-weight:700; padding:4px 10px; border-radius:999px;
+      border:1px solid var(--line); background:#fff; color:var(--muted)}
+  .bb.ran{background:var(--ok-bg); border-color:var(--ok-ln); color:var(--ok)}
+  .bb.ran-fin{background:var(--fin-bg); border-color:var(--fin-ln); color:var(--fin)}
+  .bb.ran-err{background:var(--err-bg); border-color:var(--err-ln); color:var(--err)}
+  .bb.skip{opacity:.45; text-decoration:line-through}
+
+  /* file / resource badge */
+  .res{display:flex; align-items:center; gap:10px; margin:10px 0 2px; font-size:.86rem}
+  .badge{font-weight:800; font-size:.78rem; padding:5px 12px; border-radius:8px; letter-spacing:.02em;
+         border:1px solid var(--line); transition:background .2s, color .2s, border-color .2s}
+  .badge.closed{background:#f1f3f6; color:#8b94a3}
+  .badge.open{background:var(--ok-bg); color:var(--ok); border-color:var(--ok-ln)}
+  .args{font-family:Consolas,monospace; font-size:.78rem; color:var(--muted); margin-top:6px}
+  .args b{color:var(--ink)}
+
+  /* generic helpers */
+  .callout{border-left:4px solid var(--accent); background:var(--accent-bg);
+           padding:11px 14px; border-radius:0 10px 10px 0; margin:14px 0 2px; font-size:.92rem}
+  .callout.amber{border-color:var(--fin); background:var(--fin-bg)}
+  .callout.green{border-color:var(--ok); background:var(--ok-bg)}
+  .why{margin:10px 0 0; padding-left:0; list-style:none}
+  .why li{margin:7px 0; padding-left:26px; position:relative}
+  .why li::before{content:"→"; position:absolute; left:6px; color:var(--accent); font-weight:800}
+  table.cmp{width:100%; border-collapse:collapse; font-size:.86rem; margin-top:10px}
+  table.cmp th,table.cmp td{border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top}
+  table.cmp th{background:#f3f5f8; font-weight:700}
+  .pill{display:inline-block; font-size:.72rem; font-weight:700; padding:2px 8px; border-radius:6px; background:var(--accent-bg); color:#3a2fb0}
+  .src{font-size:.82rem; color:var(--muted)}
+  .src a{color:var(--accent); text-decoration:none} .src a:hover{text-decoration:underline}
+  .outcome{margin-top:12px; font-size:.9rem; font-weight:600; padding:10px 13px; border-radius:10px; border:1px solid var(--line)}
+  .outcome.prop{background:var(--err-bg); border-color:var(--err-ln); color:var(--err)}
+  .outcome.supp{background:var(--ok-bg); border-color:var(--ok-ln); color:var(--ok)}
+  .outcome.norm{background:var(--accent-bg); border-color:var(--accent-ln); color:#3a2fb0}
+  .outcome.idle{color:var(--muted)}
+  footer{margin-top:34px; color:var(--muted); font-size:.8rem; text-align:center}
+  .toc{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 2px}
+  .toc a{font-size:.82rem; text-decoration:none; color:var(--accent); border:1px solid var(--accent-ln);
+         background:var(--accent-bg); padding:5px 11px; border-radius:999px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Week 1 · Day 5 · interactive upgrade</div>
+  <h1>⚙️ Errors, EAFP &amp; Context Managers</h1>
+  <div class="zh">错误处理、EAFP 与上下文管理器 —— 一个可单步执行的「运行时追踪器」。看代码*在什么顺序下*运行，而不是只读结论。</div>
+  <p class="lede">
+    The one idea under all of today: <b>an exception is a second return channel.</b> When <code>raise</code> fires,
+    normal top-to-bottom flow <b>stops instantly</b> and Python <i>unwinds</i> outward looking for a matching
+    <code>except</code>. Everything below — <code>finally</code>, <code>with</code>/<code>__exit__</code> — is about
+    <b>what still gets to run</b> during that unwinding so resources don't leak. <i>Drive each tracer with Step ▸.</i>
+  </p>
+  <div class="zh">今天的核心思想：<b>异常是第二条返回通道</b>。<code>raise</code> 一旦触发，正常的自上而下流程<b>立即停止</b>，Python 向外<i>回溯</i>寻找匹配的 <code>except</code>。下面的 <code>finally</code>、<code>with</code>/<code>__exit__</code> 都是为了保证回溯过程中清理代码<b>仍会运行</b>，资源不泄露。点 Step ▸ 单步驱动每个追踪器。</div>
+
+  <div class="toc">
+    <a href="#eafp">① EAFP vs LBYL</a>
+    <a href="#flow">② try/except/else/finally</a>
+    <a href="#tree">③ Exception hierarchy</a>
+    <a href="#cm">④ Context managers</a>
+    <a href="#mod">⑤ Modules &amp; __name__</a>
+    <a href="#sheet">⑥ Cheat-sheet</a>
+  </div>
+
+
+  <!-- ===================== ① EAFP ===================== -->
+  <section id="eafp">
+    <div class="head">
+      <h2>① EAFP vs LBYL <span class="pill">deeper</span></h2>
+      <div class="zh">「请求原谅」比「请求许可」更容易 —— 为什么 Python 偏好 EAFP</div>
+    </div>
+    <p class="lede" style="margin-top:0">
+      <b>LBYL</b> ("Look Before You Leap") checks <i>first</i>, then acts. <b>EAFP</b>
+      ("Easier to Ask Forgiveness than Permission") just acts, and handles the failure. Python prefers EAFP —
+      and the sharpest reason is a bug LBYL can't see: the <b>check can go stale before the use</b> (a TOCTOU race).
+    </p>
+    <div class="zh">LBYL 先检查再行动；EAFP 直接行动、失败再处理。Python 偏好 EAFP —— 最关键的原因是 LBYL 看不见的 bug：<b>检查和使用之间，条件可能已经失效</b>（TOCTOU 竞态）。</div>
+
+    <div class="twocol" style="margin-top:14px">
+      <div>
+        <div class="code" id="lbyl-code"></div>
+        <div class="blocks"><span class="bb" id="lbyl-verdict">LBYL · idle</span></div>
+      </div>
+      <div>
+        <div class="code" id="eafp-code"></div>
+        <div class="blocks"><span class="bb" id="eafp-verdict">EAFP · idle</span></div>
+      </div>
+    </div>
+
+    <div class="ctl">
+      <span class="lab">simulate</span>
+      <button class="pri" onclick="RACE.run()">Run both — evict the key mid-check ▸</button>
+      <button class="ghost" onclick="RACE.reset()">Reset</button>
+    </div>
+    <div class="console" id="race-log"></div>
+
+    <ul class="why">
+      <li><b>No race window.</b> EAFP's lookup is one atomic step — nothing can slip between "check" and "use", because there is no separate check.</li>
+      <li><b>Less duplication / faster happy path.</b> You don't state the condition twice; a <code>try</code> costs almost nothing until it actually raises.</li>
+      <li><b>Duck typing fit.</b> EAFP asks "does it <i>behave</i>?" not "is it the right type?" — the Pythonic question.</li>
+      <li><b>When LBYL still wins:</b> the action is expensive or irreversible and the check is cheap (validate <i>before</i> launching the rocket).</li>
+    </ul>
+    <div class="zh" style="margin-top:8px">为什么偏好 EAFP：① 无竞态窗口（查找是原子的）；② 不重复条件、happy path 更快；③ 契合鸭子类型（问「能不能用」而非「是不是某类型」）。LBYL 仍合适的场景：动作昂贵/不可逆而检查便宜时——先验证，再发射火箭。</div>
+    <p class="src">Primary source · <a href="https://docs.python.org/3/glossary.html#term-EAFP" target="_blank">Python glossary — EAFP / LBYL</a></p>
+  </section>
+
+
+  <!-- ===================== ② try/except/else/finally ===================== -->
+  <section id="flow">
+    <div class="head">
+      <h2>② <code>try / except / else / finally</code> <span class="pill">runtime trace</span></h2>
+      <div class="zh">谁会运行、按什么顺序 —— 单步看 <code>finally</code> 永远运行</div>
+    </div>
+
+    <div class="ctl">
+      <span class="lab">what does risky() do?</span>
+      <div class="seg" id="flow-mode">
+        <button class="on" onclick="FLOW.setMode('none',this)">succeeds</button>
+        <button onclick="FLOW.setMode('value',this)">raise ValueError</button>
+        <button onclick="FLOW.setMode('key',this)">raise KeyError</button>
+      </div>
+    </div>
+
+    <div class="twocol" style="margin-top:6px">
+      <div>
+        <div class="code" id="flow-code"></div>
+        <div class="ctl">
+          <button class="pri" onclick="FLOW.step()">Step ▸</button>
+          <button onclick="FLOW.run()">Run ▶</button>
+          <button class="ghost" onclick="FLOW.reset()">Reset</button>
+        </div>
+      </div>
+      <div>
+        <div class="blocks" id="flow-blocks">
+          <span class="bb" data-b="try">try</span>
+          <span class="bb" data-b="except">except&nbsp;ValueError</span>
+          <span class="bb" data-b="else">else</span>
+          <span class="bb" data-b="finally">finally</span>
+          <span class="bb" data-b="after">after()</span>
+        </div>
+        <div class="console" id="flow-log"></div>
+      </div>
+    </div>
+
+    <div class="callout amber">
+      🪂 <b>The amber rule.</b> <code>finally</code> runs on <i>every</i> exit — success, a handled error, an
+      <b>unhandled</b> error on its way out, even a <code>return</code>. Switch to <b>KeyError</b> (which the
+      <code>except ValueError</code> can't catch) and watch: <code>finally</code> still fires, then the exception
+      keeps propagating and <code>after()</code> is <b>skipped</b>.
+    </div>
+    <div class="zh">🪂 琥珀色规则：<code>finally</code> 在<i>所有</i>退出路径上都运行——成功、已处理的异常、正在向外传播的<b>未处理</b>异常、甚至 <code>return</code>。切到 KeyError（<code>except ValueError</code> 抓不住）看：<code>finally</code> 照样运行，然后异常继续传播，<code>after()</code> 被<b>跳过</b>。</div>
+    <p class="src">Primary source · <a href="https://docs.python.org/3/reference/compound_stmts.html#the-try-statement" target="_blank">Reference — the <code>try</code> statement</a></p>
+  </section>
+
+
+  <!-- ===================== ③ hierarchy ===================== -->
+  <section id="tree">
+    <div class="head">
+      <h2>③ Exception hierarchy <span class="pill">isinstance matching</span></h2>
+      <div class="zh">异常是继承树上的对象 —— <code>except</code> 匹配 = <code>isinstance</code> 检查</div>
+    </div>
+    <p class="lede" style="margin-top:0">
+      <code>except SomeType</code> is literally an <code>isinstance</code> check against the raised object, tried
+      <b>top-to-bottom, first match wins</b>. So <code>except LookupError</code> catches its children
+      <code>KeyError</code> and <code>IndexError</code> — catch the <b>parent</b>, get the <b>children</b>.
+    </p>
+    <div class="zh">捕获父类即可捕获子类；子句自上而下匹配，第一个命中者获胜。</div>
+
+    <div class="ctl" style="margin-top:14px">
+      <span class="lab">raise</span>
+      <div class="seg" id="tree-exc">
+        <button class="on" onclick="TREE.setExc('KeyError',this)">KeyError</button>
+        <button onclick="TREE.setExc('IndexError',this)">IndexError</button>
+        <button onclick="TREE.setExc('ValueError',this)">ValueError</button>
+        <button onclick="TREE.setExc('KeyboardInterrupt',this)">KeyboardInterrupt</button>
+      </div>
+      <span class="lab" style="margin-left:8px">clause order</span>
+      <div class="seg" id="tree-order">
+        <button class="on" onclick="TREE.setOrder('specific',this)">specific → general</button>
+        <button onclick="TREE.setOrder('general',this)">general → specific ⚠</button>
+      </div>
+    </div>
+
+    <div class="twocol" style="margin-top:6px">
+      <div>
+        <div class="code" id="tree-code"></div>
+        <div class="ctl">
+          <button class="pri" onclick="TREE.match()">Match it ▸</button>
+          <button class="ghost" onclick="TREE.reset()">Reset</button>
+        </div>
+      </div>
+      <div><div class="console" id="tree-log"></div></div>
+    </div>
+
+    <div class="callout">
+      🏷️ <b>Custom hierarchy = a labeled fuse box.</b> <code>class LogLevelError(LogError)</code> means
+      <code>except LogError</code> also catches <code>LogLevelError</code> — exactly Part-C test #5 of your homework.
+      And in <b>general → specific</b> order, pyright flags the shadowed clause:
+      <code>reportUnusedExcept — "KeyError" is a subclass of "Exception"</code>. The type checker enforces the rule for you.
+    </div>
+    <div class="zh">🏷️ 自定义层次 = 贴标签的保险丝盒：<code>except LogError</code> 也能抓住 <code>LogLevelError</code>（正是作业 Part-C 第5个测试）。若把宽泛子句放前面，pyright 会报 <code>reportUnusedExcept</code>——类型检查器替你执行「具体→宽泛」的规则。</div>
+    <p class="src">Primary source · <a href="https://docs.python.org/3/library/exceptions.html#exception-hierarchy" target="_blank">Library — exception hierarchy</a></p>
+  </section>
+
+
+  <!-- ===================== ④ context managers (signature) ===================== -->
+  <section id="cm">
+    <div class="head">
+      <h2>④ Context managers <span class="pill">the deep one · your homework engine</span></h2>
+      <div class="zh">保证的初始化 *和* 清理 —— <code>__enter__</code> / <code>__exit__</code> 生命周期</div>
+    </div>
+    <p class="lede" style="margin-top:0">
+      🚗 <b>A rental car that returns itself.</b> <code>__enter__</code> = pick up keys; the block = your trip;
+      <code>__exit__</code> = the car drives <i>itself</i> back and settles up — <b>even after a breakdown</b>.
+      Toggle a breakdown and the suppress switch, then step the lifecycle.
+    </p>
+    <div class="zh">🚗 一辆会自己归还的租车：<code>__enter__</code> 取钥匙，代码块是行程，<code>__exit__</code> 让车自己开回来并结账——即使中途抛锚。下面切换「抛锚」与「抑制开关」再单步执行。</div>
+
+    <div class="ctl" style="margin-top:14px">
+      <span class="lab">body</span>
+      <div class="seg ok" id="cm-raise">
+        <button class="on" onclick="CM.setRaise(false,this)">works</button>
+        <button onclick="CM.setRaise(true,this)">raises ValueError</button>
+      </div>
+      <span class="lab" style="margin-left:8px">__exit__ returns</span>
+      <div class="seg" id="cm-supp">
+        <button class="on" onclick="CM.setSupp(false,this)">False (propagate)</button>
+        <button onclick="CM.setSupp(true,this)">True (suppress)</button>
+      </div>
+    </div>
+
+    <div class="twocol" style="margin-top:6px">
+      <div>
+        <div class="code" id="cm-code"></div>
+        <div class="ctl">
+          <button class="pri" onclick="CM.step()">Step ▸</button>
+          <button onclick="CM.run()">Run ▶</button>
+          <button class="ghost" onclick="CM.reset()">Reset</button>
+        </div>
+      </div>
+      <div>
+        <div class="res">
+          <span>resource <code>app.log</code>:</span>
+          <span class="badge closed" id="cm-file">CLOSED</span>
+        </div>
+        <div class="args" id="cm-args">__exit__ args: <b>—</b></div>
+        <div class="console" id="cm-log"></div>
+        <div class="outcome idle" id="cm-outcome">outcome appears here</div>
+      </div>
+    </div>
+
+    <table class="cmp">
+      <tr><th><code>__exit__</code> sees…</th><th>block succeeded</th><th>block raised</th></tr>
+      <tr><td><code>exc_type / val / tb</code></td><td>all <code>None</code></td><td>the class / instance / traceback</td></tr>
+      <tr><td>returns <code>False</code>/<code>None</code></td><td>—</td><td>exception <b>propagates</b> ✅ right default</td></tr>
+      <tr><td>returns <code>True</code></td><td>—</td><td>exception <b>suppressed</b> (rare, deliberate)</td></tr>
+    </table>
+
+    <div class="callout green">
+      🎯 <b>This is your <code>FileLogger</code> proof.</b> The "raises + returns False" run is exactly your key test:
+      file goes <b>CLOSED even on the error path</b>, then the exception surfaces to the caller. Your test = raise inside the
+      <code>with</code>, then <code>assert log._file.closed is True</code>. For the logger you want <code>False</code> — close the file, let the caller's error through.
+    </div>
+    <div class="zh">🎯 这就是你 <code>FileLogger</code> 的证明：「抛错 + 返回 False」正是关键测试——文件在错误路径上也<b>关闭</b>，异常再上抛给调用者。测试 = 在 <code>with</code> 内抛错，然后 <code>assert log._file.closed is True</code>。日志器应返回 <code>False</code>：关文件，但放行调用者的错误。</div>
+
+    <div class="callout">
+      🧩 <b><code>with</code> is just sugar for <code>try / finally</code>.</b>
+      <pre class="mono" style="margin:8px 0 0; font-size:.8rem; white-space:pre-wrap">with Mgr() as r:        mgr = Mgr()
+    body(r)       ⇒     r = mgr.__enter__()
+                        try:     body(r)
+                        finally: mgr.__exit__(type, val, tb)   # True here stops the exception</pre>
+    </div>
+    <p class="src">Primary source · <a href="https://docs.python.org/3/reference/datamodel.html#with-statement-context-managers" target="_blank">Data model — <code>with</code> context managers</a> · <a href="https://docs.python.org/3/library/contextlib.html" target="_blank">contextlib</a></p>
+  </section>
+
+
+  <!-- ===================== ⑤ modules ===================== -->
+  <section id="mod">
+    <div class="head">
+      <h2>⑤ Modules, packages &amp; <code>__name__</code></h2>
+      <div class="zh">模块 = 一个 <code>.py</code>；包 = 文件夹 + <code>__init__.py</code>；<code>__name__</code> 守卫</div>
+    </div>
+    <div class="ctl" style="margin-top:4px">
+      <span class="lab">how is logger.py reached?</span>
+      <div class="seg" id="mod-mode">
+        <button class="on" onclick="MOD.set('run',this)">python logger.py</button>
+        <button onclick="MOD.set('import',this)">from logkit import logger</button>
+      </div>
+    </div>
+    <div class="twocol" style="margin-top:6px">
+      <div><div class="code" id="mod-code"></div></div>
+      <div><div class="console" id="mod-log"></div></div>
+    </div>
+    <ul class="why">
+      <li>🍞 <b>Import runs once, then caches</b> in <code>sys.modules</code>: the first import executes the file top-to-bottom; later imports take a slice of the same loaf. Side effects fire <b>once</b>.</li>
+      <li>🎭 <code>__name__</code> is <code>"__main__"</code> only when the file is <b>run directly</b>; when imported it's the module's dotted name (<code>"logkit.logger"</code>). So the guard = "script mode only".</li>
+      <li>📇 <code>__init__.py</code> is the package's <b>front desk</b>: <code>from .logger import FileLogger</code> lets callers write <code>from logkit import FileLogger</code>.</li>
+    </ul>
+    <div class="zh">🍞 导入只运行一次并缓存（<code>sys.modules</code>），副作用只发生一次。🎭 直接运行时 <code>__name__=="__main__"</code>，被导入时是模块点名。📇 <code>__init__.py</code> 是包的前台，整理对外公开的名字。</div>
+    <p class="src">Primary source · <a href="https://docs.python.org/3/tutorial/modules.html" target="_blank">Tutorial — modules &amp; packages</a></p>
+  </section>
+
+
+  <!-- ===================== ⑥ cheat-sheet ===================== -->
+  <section id="sheet">
+    <div class="head"><h2>⑥ Cheat-sheet &amp; pitfalls</h2></div>
+    <div class="twocol">
+      <div>
+        <div class="code mono" style="line-height:1.5; padding:14px">
+<span class="tok-kw">try</span>: ...
+<span class="tok-kw">except</span> ValueError <span class="tok-kw">as</span> e: ...  <span class="tok-cm"># specific; never bare except:</span>
+<span class="tok-kw">else</span>: ...                    <span class="tok-cm"># only if no exception</span>
+<span class="tok-kw">finally</span>: ...                 <span class="tok-cm"># ALWAYS (the parachute)</span>
+
+<span class="tok-kw">class</span> <span class="tok-fn">MyError</span>(Exception): ...   <span class="tok-cm"># build a hierarchy, carry data</span>
+
+<span class="tok-kw">class</span> <span class="tok-fn">Resource</span>:
+    <span class="tok-kw">def</span> <span class="tok-fn">__enter__</span>(self): <span class="tok-kw">return</span> self
+    <span class="tok-kw">def</span> <span class="tok-fn">__exit__</span>(self, et, ev, tb): <span class="tok-kw">return</span> <span class="tok-kw">False</span>
+
+<span class="tok-kw">if</span> __name__ == <span class="tok-str">"__main__"</span>: ...   <span class="tok-cm"># direct-run only</span>
+        </div>
+      </div>
+      <div>
+        <table class="cmp">
+          <tr><th>Trap</th><th>Fix</th></tr>
+          <tr><td>Bare <code>except:</code> swallows Ctrl-C &amp; bugs</td><td>Catch the <i>specific</i> type</td></tr>
+          <tr><td>General clause before specific (dead code)</td><td>Order <b>specific → general</b></td></tr>
+          <tr><td>Cleanup in the <code>try</code> body</td><td>Use <code>finally</code> / <code>with</code></td></tr>
+          <tr><td><code>__exit__</code> returns <code>True</code> by accident</td><td>Return <code>False</code> unless suppressing on purpose</td></tr>
+          <tr><td><code>allowed_levels={...}</code> mutable default</td><td><code>=None</code> sentinel, build set inside</td></tr>
+          <tr><td>Missing <code>__init__.py</code></td><td>Add it — folder isn't a package without it</td></tr>
+        </table>
+        <div class="callout" style="margin-top:14px">
+          💬 <b>I'm your teacher — ask follow-ups.</b> Anything unclear above, ask me to re-trace it, slow it down, or
+          tie it to your <code>logkit</code> homework. Next: build <code>FileLogger</code>; then RECALL cold before Day 6.
+        </div>
+        <div class="zh">💬 有任何不清楚的，叫我重新单步、放慢、或对照 <code>logkit</code> 作业讲解。下一步：构建 <code>FileLogger</code>，第6天前冷做 RECALL。</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>Day 5 · Week 1 — interactive upgrade · EAFP &amp; context managers · vanilla JS, self-contained, no dependencies.</footer>
+</div>
+
+<script>
+/* ---------- tiny shared helpers ---------- */
+function el(id){ return document.getElementById(id); }
+function logTo(id, html, cls){
+  const box = el(id);
+  const line = document.createElement('div');
+  if(cls) line.className = cls;
+  line.innerHTML = html;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+}
+function clearLog(id){ el(id).innerHTML = ''; }
+// build a steppable code block from [{n, html}] line specs
+function renderCode(id, lines){
+  el(id).innerHTML = lines.map((L,i)=>
+    `<div class="ln" data-i="${i}"><span class="g">${L.n||''}</span><span>${L.html}</span></div>`
+  ).join('');
+}
+function markLine(id, i, cls){
+  const lns = el(id).querySelectorAll('.ln');
+  lns.forEach(l=>l.classList.remove('active'));
+  if(i>=0 && lns[i]){ lns[i].classList.add('active', 'ran'); if(cls) lns[i].classList.add(cls); }
+}
+function skipLine(id, i){ const l=el(id).querySelectorAll('.ln')[i]; if(l) l.classList.add('skip'); }
+function resetCode(id){ el(id).querySelectorAll('.ln').forEach(l=>l.classList.remove('active','ran','ran-ok','ran-err','ran-fin','skip')); }
+
+
+/* ================= ① EAFP race ================= */
+const RACE = (function(){
+  const lbyl = [
+    {n:1, html:'<span class="tok-kw">if</span> key <span class="tok-kw">in</span> cache:        <span class="tok-cm"># 1 check</span>'},
+    {n:2, html:'    <span class="tok-cm"># ← another thread can evict HERE</span>'},
+    {n:3, html:'    <span class="tok-kw">return</span> cache[key]   <span class="tok-cm"># 2 use</span>'},
+  ];
+  const eafp = [
+    {n:1, html:'<span class="tok-kw">try</span>:'},
+    {n:2, html:'    <span class="tok-kw">return</span> cache[key]   <span class="tok-cm"># check+use, atomic</span>'},
+    {n:3, html:'<span class="tok-kw">except</span> KeyError:'},
+    {n:4, html:'    <span class="tok-kw">return</span> default'},
+  ];
+  function reset(){
+    renderCode('lbyl-code', lbyl); renderCode('eafp-code', eafp);
+    clearLog('race-log');
+    el('lbyl-verdict').className='bb'; el('lbyl-verdict').textContent='LBYL · idle';
+    el('eafp-verdict').className='bb'; el('eafp-verdict').textContent='EAFP · idle';
+  }
+  function run(){
+    reset();
+    logTo('race-log','<span class="dim"># both start with key present in the cache</span>');
+    // LBYL
+    markLine('lbyl-code',0,'ran-ok');
+    logTo('race-log','<span class="acc">LBYL</span> line 1: <b>key in cache</b> → True, check passes','acc');
+    markLine('lbyl-code',1,'ran-err');
+    logTo('race-log','<span class="err">⚡ another thread evicts key — the check is now STALE</span>','err');
+    markLine('lbyl-code',2,'ran-err');
+    logTo('race-log','LBYL line 3: <b>cache[key]</b> → <span class="err">KeyError!</span> crashed despite checking','err');
+    el('lbyl-verdict').className='bb ran-err'; el('lbyl-verdict').textContent='LBYL · 💥 KeyError (race)';
+    // EAFP
+    markLine('eafp-code',0); markLine('eafp-code',1,'ran-err');
+    logTo('race-log','<span class="acc">EAFP</span> line 2: <b>cache[key]</b> — same eviction, but lookup is one atomic step','acc');
+    markLine('eafp-code',2,'ran-ok'); markLine('eafp-code',3,'ran-ok');
+    logTo('race-log','EAFP: <b>except KeyError</b> catches it → returns default <span class="ok">✓ survived</span>','ok');
+    el('eafp-verdict').className='bb ran'; el('eafp-verdict').textContent='EAFP · ✓ handled atomically';
+  }
+  reset();
+  return {run, reset};
+})();
+
+
+/* ================= ② try/except/else/finally ================= */
+const FLOW = (function(){
+  const code = [
+    {n:1, html:'<span class="tok-kw">try</span>:'},
+    {n:2, html:'    risky()              <span class="tok-cm"># may raise</span>'},
+    {n:3, html:'    ok = <span class="tok-kw">True</span>            <span class="tok-cm"># only if no raise</span>'},
+    {n:4, html:'<span class="tok-kw">except</span> ValueError:       <span class="tok-cm"># handles ValueError only</span>'},
+    {n:5, html:'    handle()'},
+    {n:6, html:'<span class="tok-kw">else</span>:                    <span class="tok-cm"># only if try raised nothing</span>'},
+    {n:7, html:'    on_success()'},
+    {n:8, html:'<span class="tok-kw">finally</span>:                 <span class="tok-cm"># ALWAYS</span>'},
+    {n:9, html:'    cleanup()'},
+    {n:10,html:'after()                  <span class="tok-cm"># first line after the try-stmt</span>'},
+  ];
+  // each step: [lineIndex, blockName, logHtml, logCls, lineCls]
+  const seqs = {
+    none: [
+      [0,'try','enter <b>try</b> block','dim',''],
+      [1,'try','risky() ran, no exception','ok','ran-ok'],
+      [2,'try','ok = True','ok','ran-ok'],
+      [5,'else','<b>else</b>: try raised nothing → run it','ok','ran-ok'],
+      [6,'else','on_success()','ok','ran-ok'],
+      [7,'finally','<b>finally</b>: ALWAYS runs','fin','ran-fin'],
+      [8,'finally','cleanup()','fin','ran-fin'],
+      [9,'after','after() — normal exit','ok','ran-ok'],
+    ],
+    value: [
+      [0,'try','enter <b>try</b> block','dim',''],
+      [1,'try','risky() → <span class="err">raises ValueError</span>','err','ran-err'],
+      [3,'except','<b>except ValueError</b> matches → handle it','ok','ran-ok'],
+      [4,'except','handle()','ok','ran-ok'],
+      [7,'finally','<b>finally</b>: ALWAYS runs','fin','ran-fin'],
+      [8,'finally','cleanup()','fin','ran-fin'],
+      [9,'after','after() — exception was handled, flow continues','ok','ran-ok'],
+    ],
+    key: [
+      [0,'try','enter <b>try</b> block','dim',''],
+      [1,'try','risky() → <span class="err">raises KeyError</span>','err','ran-err'],
+      [3,'except','<b>except ValueError</b> does NOT match KeyError','dim',''],
+      [7,'finally','<b>finally</b>: ALWAYS runs — even unhandled!','fin','ran-fin'],
+      [8,'finally','cleanup()','fin','ran-fin'],
+      [-1,'propagate','<span class="err">KeyError keeps propagating ↑ — after() SKIPPED</span>','err',''],
+    ],
+  };
+  let mode='none', i=0, timer=null;
+  function setMode(m, btn){
+    mode=m; document.querySelectorAll('#flow-mode button').forEach(b=>b.classList.remove('on'));
+    if(btn) btn.classList.add('on'); reset();
+  }
+  function reset(){
+    i=0; if(timer){clearInterval(timer);timer=null;}
+    renderCode('flow-code', code); clearLog('flow-log');
+    document.querySelectorAll('#flow-blocks .bb').forEach(b=>b.className='bb');
+    logTo('flow-log','<span class="dim"># risky() = '+(mode==='none'?'succeeds':mode==='value'?'raise ValueError':'raise KeyError')+'. Step ▸</span>');
+  }
+  function blockBadge(name){
+    const b=document.querySelector('#flow-blocks .bb[data-b="'+name+'"]'); if(!b) return;
+    if(name==='finally') b.className='bb ran-fin';
+    else if(name==='except') b.className = (mode==='value') ? 'bb ran' : 'bb skip'; // tried but no match in key mode
+    else b.className='bb ran';
+  }
+  function step(){
+    const seq=seqs[mode];
+    if(i>=seq.length){
+      // mark skipped blocks/lines at the end
+      if(mode==='none'){ ['except'].forEach(markSkip); skipLine('flow-code',3); skipLine('flow-code',4); }
+      if(mode==='value'){ ['else'].forEach(markSkip); skipLine('flow-code',2); skipLine('flow-code',5); skipLine('flow-code',6); }
+      if(mode==='key'){ ['else','after'].forEach(markSkip); skipLine('flow-code',2);skipLine('flow-code',4);skipLine('flow-code',5);skipLine('flow-code',6);skipLine('flow-code',9); }
+      return;
+    }
+    const [li, blk, html, cls, lcls]=seq[i];
+    if(li>=0) markLine('flow-code', li, lcls);
+    if(blk!=='propagate') blockBadge(blk);
+    logTo('flow-log', html, cls);
+    i++;
+    if(i>=seq.length) step(); // run the skip-marking pass
+  }
+  function markSkip(name){ const b=document.querySelector('#flow-blocks .bb[data-b="'+name+'"]'); if(b) b.className='bb skip'; }
+  function run(){ reset(); timer=setInterval(()=>{ if(i>=seqs[mode].length){clearInterval(timer);timer=null; step();} else step(); }, 720); }
+  reset();
+  return {setMode, step, run, reset};
+})();
+
+
+/* ================= ③ exception hierarchy ================= */
+const TREE = (function(){
+  // ancestry chains (most specific → base)
+  const ANC = {
+    KeyError:['KeyError','LookupError','Exception','BaseException'],
+    IndexError:['IndexError','LookupError','Exception','BaseException'],
+    ValueError:['ValueError','Exception','BaseException'],
+    KeyboardInterrupt:['KeyboardInterrupt','BaseException'],
+  };
+  const clausesSpecific = ['KeyError','LookupError','Exception'];
+  const clausesGeneral  = ['Exception','LookupError','KeyError'];
+  let exc='KeyError', order='specific';
+  function clauses(){ return order==='specific'?clausesSpecific:clausesGeneral; }
+  function codeLines(){
+    const lines=[{n:1, html:'<span class="tok-kw">try</span>:'},
+                 {n:2, html:'    <span class="tok-kw">raise</span> '+exc+'(...)'}];
+    clauses().forEach((c,k)=>{
+      lines.push({n:3+k*2, html:'<span class="tok-kw">except</span> '+c+':'});
+      lines.push({n:4+k*2, html:'    handle_'+c.toLowerCase()+'()'});
+    });
+    return lines;
+  }
+  function setExc(e, btn){ exc=e; seg('tree-exc',btn); reset(); }
+  function setOrder(o, btn){ order=o; seg('tree-order',btn); reset(); }
+  function seg(id,btn){ document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.remove('on')); if(btn) btn.classList.add('on'); }
+  function reset(){
+    renderCode('tree-code', codeLines()); clearLog('tree-log');
+    logTo('tree-log','<span class="dim"># raise '+exc+' — clauses tried top→down. Match it ▸</span>');
+  }
+  function match(){
+    reset();
+    const anc=ANC[exc], cs=clauses(); let caught=false;
+    markLine('tree-code',1,'ran-err');
+    logTo('tree-log','raised <b>'+exc+'</b> (is-a: '+anc.join(' → ')+')','err');
+    for(let k=0;k<cs.length;k++){
+      const c=cs[k], hit=anc.indexOf(c)>=0, lineIdx=2+k*2;
+      if(caught){
+        skipLine('tree-code',lineIdx); skipLine('tree-code',lineIdx+1);
+        if(order==='general'&&k>0) logTo('tree-log','except '+c+': <span class="dim">unreachable — pyright: reportUnusedExcept</span>','dim');
+        continue;
+      }
+      if(hit){
+        markLine('tree-code',lineIdx,'ran-ok'); markLine('tree-code',lineIdx+1,'ran-ok');
+        logTo('tree-log','<b>except '+c+'</b>: isinstance('+exc+', '+c+') = <span class="ok">True</span> → caught here ✓','ok');
+        caught=true;
+      } else {
+        markLine('tree-code',lineIdx);
+        logTo('tree-log','except '+c+': isinstance = <span class="dim">False</span> → skip','dim');
+      }
+    }
+    if(!caught) logTo('tree-log','<span class="err">no clause matched → '+exc+' propagates (uncaught)</span>','err');
+    else if(order==='general') logTo('tree-log','⚠ general-first: more specific clauses below became <b>dead code</b>','fin');
+  }
+  reset();
+  return {setExc, setOrder, match, reset};
+})();
+
+
+/* ================= ④ context manager lifecycle ================= */
+const CM = (function(){
+  const code = [
+    {n:1, html:'<span class="tok-kw">with</span> <span class="tok-fn">FileLogger</span>(<span class="tok-str">"app.log"</span>) <span class="tok-kw">as</span> log:'},
+    {n:2, html:'    <span class="tok-cm"># __enter__ opened the file, returned self → log</span>'},
+    {n:3, html:'    log.write(<span class="tok-str">"INFO"</span>, <span class="tok-str">"started"</span>)'},
+    {n:4, html:'    <span class="tok-cm">BODYLINE</span>'},
+    {n:5, html:'<span class="tok-cm"># __exit__(exc_type, exc_val, exc_tb) runs here — ALWAYS</span>'},
+    {n:6, html:'after()'},
+  ];
+  let raises=false, supp=false, i=0, timer=null;
+  function bodyLine(){ return raises
+    ? '<span class="tok-kw">raise</span> ValueError(<span class="tok-str">"boom"</span>)   <span class="tok-cm"># breakdown!</span>'
+    : 'log.write(<span class="tok-str">"INFO"</span>, <span class="tok-str">"done"</span>)'; }
+  function setRaise(v, btn){ raises=v; seg('cm-raise',btn); reset(); }
+  function setSupp(v, btn){ supp=v; seg('cm-supp',btn); reset(); }
+  function seg(id,btn){ document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.remove('on')); if(btn) btn.classList.add('on'); }
+  function file(state){ const b=el('cm-file'); b.className='badge '+(state==='OPEN'?'open':'closed'); b.textContent=state; }
+  function steps(){
+    const s=[
+      [0,'<span class="dim">construct FileLogger — file still CLOSED</span>','dim','CLOSED',null,null],
+      [0,'<b>__enter__</b>: open "app.log" (append), <span class="ok">return self → log</span>','ok','OPEN',null,null],
+      [2,'body: log.write("INFO","started") ✓','ok','OPEN',null,null],
+    ];
+    if(raises) s.push([3,'body: <span class="err">raise ValueError("boom")</span> — block aborts','err','OPEN',null,null]);
+    else       s.push([3,'body: log.write("INFO","done") ✓','ok','OPEN',null,null]);
+    // __exit__ always
+    const args = raises
+      ? 'exc_type=<b>ValueError</b>, exc_val=<b>ValueError(\'boom\')</b>, exc_tb=<b>&lt;traceback&gt;</b>'
+      : 'exc_type=<b>None</b>, exc_val=<b>None</b>, exc_tb=<b>None</b>';
+    s.push([4,'<b>__exit__</b> called with '+(raises?'the exception triple':'all None'),'fin','OPEN',args,null]);
+    s.push([4,'<b>__exit__</b>: self._file.close() → file <span class="fin">CLOSED (always)</span>','fin','CLOSED',args,null]);
+    // return value + outcome
+    if(!raises){
+      s.push([5,'after() runs — normal exit','ok','CLOSED',args,['norm','file CLOSED ✓ · no exception · returned value ignored']]);
+    } else if(supp){
+      s.push([4,'__exit__ <b>returns True</b> → exception <span class="ok">SUPPRESSED</span>','ok','CLOSED',args,null]);
+      s.push([5,'after() runs — we survived the breakdown','ok','CLOSED',args,['supp','file CLOSED ✓ · ValueError swallowed by __exit__']]);
+    } else {
+      s.push([-1,'__exit__ <b>returns False</b> → <span class="err">ValueError PROPAGATES ↑</span> (after() skipped)','err','CLOSED',args,['prop','file CLOSED ✓ · ValueError surfaces to caller — your homework proof']]);
+    }
+    return s;
+  }
+  function reset(){
+    i=0; if(timer){clearInterval(timer);timer=null;}
+    const c=code.map(L=> L.html.includes('BODYLINE') ? {n:L.n, html:'    '+bodyLine()} : L);
+    renderCode('cm-code', c); clearLog('cm-log'); file('CLOSED');
+    el('cm-args').innerHTML='__exit__ args: <b>—</b>';
+    const o=el('cm-outcome'); o.className='outcome idle'; o.textContent='outcome appears here — Step ▸';
+  }
+  function step(){
+    const s=steps();
+    if(i>=s.length){ if(raises && !supp){ skipLine('cm-code',5); } return; } // after() skipped only when it propagates
+    const [li,html,cls,fstate,args,outcome]=s[i];
+    if(li>=0) markLine('cm-code', li, cls==='fin'?'ran-fin':cls==='err'?'ran-err':'ran-ok');
+    file(fstate);
+    if(args) el('cm-args').innerHTML='__exit__ args: '+args;
+    logTo('cm-log', html, cls);
+    if(outcome){ const o=el('cm-outcome'); o.className='outcome '+outcome[0]; o.textContent=outcome[1]; }
+    i++;
+  }
+  function run(){ reset(); timer=setInterval(()=>{ if(i>=steps().length){clearInterval(timer);timer=null; step();} else step(); }, 760); }
+  reset();
+  return {setRaise, setSupp, step, run, reset};
+})();
+
+
+/* ================= ⑤ modules / __name__ ================= */
+const MOD = (function(){
+  const code = [
+    {n:1, html:'<span class="tok-cm"># logkit/logger.py</span>'},
+    {n:2, html:'<span class="tok-kw">class</span> <span class="tok-fn">FileLogger</span>: ...'},
+    {n:3, html:'print(<span class="tok-str">"module body runs"</span>)   <span class="tok-cm"># side effect</span>'},
+    {n:4, html:''},
+    {n:5, html:'<span class="tok-kw">if</span> __name__ == <span class="tok-str">"__main__"</span>:'},
+    {n:6, html:'    print(<span class="tok-str">"demo / self-test"</span>)  <span class="tok-cm"># script-only</span>'},
+  ];
+  function set(mode, btn){
+    document.querySelectorAll('#mod-mode button').forEach(b=>b.classList.remove('on'));
+    if(btn) btn.classList.add('on');
+    renderCode('mod-code', code); clearLog('mod-log');
+    if(mode==='run'){
+      markLine('mod-code',2,'ran-ok');
+      logTo('mod-log','$ python logkit/logger.py','dim');
+      logTo('mod-log','<b>__name__ == "__main__"</b>','acc');
+      logTo('mod-log','module body runs','ok');
+      markLine('mod-code',4,'ran-ok'); markLine('mod-code',5,'ran-ok');
+      logTo('mod-log','demo / self-test   <span class="ok">← guard block RUNS</span>','ok');
+    } else {
+      markLine('mod-code',2,'ran-ok');
+      logTo('mod-log','>>> from logkit import logger','dim');
+      logTo('mod-log','<b>__name__ == "logkit.logger"</b>','acc');
+      logTo('mod-log','module body runs   <span class="dim">(once; then cached in sys.modules)</span>','ok');
+      markLine('mod-code',4); skipLine('mod-code',4); skipLine('mod-code',5);
+      logTo('mod-log','<span class="dim">guard block SKIPPED — not "__main__"</span>','dim');
+      logTo('mod-log','>>> from logkit import logger   <span class="dim"># 2nd import → cached, body does NOT rerun</span>','dim');
+    }
+  }
+  set('run', null);
+  return {set};
+})();
+</script>
+</body>
+</html>

@@ -33,11 +33,41 @@ machine-checked instead of eyeballed.
   flagging untyped public methods.
 
 ## /teach in this repo
-- HTML lesson upgrades follow the `/teach` SKILL.md *Visualization Upgrades* section
+- Interactive lesson HTML follows the `/teach` SKILL.md *Lessons* + *Visualization Upgrades* sections
   (`E:\Code\MyProjects\VSCode_Env\WorkFlow\skills\productivity\teach\SKILL.md`) — including consulting
   the **frontend-design** skill for visual direction.
 - Progress logs live in this project's **`progress/`** directory (per global CLAUDE.md, updated
   2026-06-25 — the old `E:\Code\ClaudeCode_Context\` location is retired).
+
+## Per-day build order, density & weekly cheat-sheet
+> Added 2026-06-27 (learner request). Shifts this workspace to **video-teacher-first**: the interactive
+> HTML lesson is *a teacher explaining by video* (go deeper, understand faster) and the lesson `.md` is
+> *the textbook* beside it. Supersedes the old "markdown first, HTML-after-recall" order in
+> `week01/MISSION.md §5b`. Applies to **new** materials (Day 6 / Week 2 onward); D1–D5 are not
+> retro-rewritten. Day-5 already complies (HTML + md both exist).
+
+**Per-day artifact order — build top to bottom:**
+1. **`LESSON.interactive.html`** — the interactive HTML/3D lesson, built **first**, the primary teaching
+   artifact. It **must embed retrieval**: ≥1 *predict-before-reveal* prompt and ≥1 *quiz-with-instant-
+   feedback*, so it rewards effort instead of being watched passively. Match the established course visual
+   system (light cards + dark runtime console + bilingual EN/中文, vanilla JS, self-contained) seen in
+   `week01/day0{3,4,5}/LESSON.interactive.html`.
+2. **`LESSON.bilingual.md`** — the *textbook* companion (reference text), authored second.
+3. **`HOMEWORK.bilingual.md`** / **`RECALL.bilingual.md`** / **`SOLUTIONS.bilingual.md`**.
+4. The learner's **`.py`** + tests.
+
+`RECALL.md` + `week01/review-queue.md` + `misconceptions.md` remain the **cold spaced re-tests** — the
+recall layer lives *outside* the lesson HTML; the embedded retrieval inside the HTML is in-the-moment.
+
+**Density floor (both the HTML and the textbook md):** every concept gets **3 escalating depth passes**
+(intuition/analogy → precise mechanism → under-the-hood/edge cases) **and 3 worked examples graded
+easy → hard**. Keep within working memory — tight passes, not pages.
+
+**Weekly:** when a week completes, produce **`weekNN/CHEATSHEET.html`** — one-page, print-clean, EN + 中文,
+covering that week's concepts (D1–D6). Inherit the course visual tokens for consistency.
+
+**Unchanged and still in force:** the **context7 primary-source rule** below (library content in the HTML
+still cites primary URLs inline) and the **pyright Definition-of-Done gate** above.
 
 ## Sourcing library/technical content — context7 is the primary source
 > Added 2026-06-25 after a before/after authority eval

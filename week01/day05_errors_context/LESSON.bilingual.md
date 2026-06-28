@@ -31,6 +31,13 @@ C1 (D1) why raise `ValueError` on bad input *immediately*? C2 (D3) the data mode
 `for x in obj`? C3 (D4) the mutable-default trap — what's shared and when is it created?
 > 🇨🇳 C1 (D1) 为什么在输入错误时*立即*抛出 `ValueError`？C2 (D3) 数据模型——`for x in obj` 时会触发什么？C3 (D4) 可变默认值陷阱——共享的是什么，何时创建？
 
+"""
+Spaced callbacks Answer:
+C1:because program catch the error by Error Words,such as "try ... except ...","if ... raise ..."
+C2:first creat a generator it1 = iter(obj),then it1 outputs items one by one through the method " __iter__ __next__","__iter__ yield func" or "__getitem__"
+C3:mutable default value shares a common address which all instance point to it.its created when instant first time  
+"""
+
 ---
 
 ## S1 — Exceptions

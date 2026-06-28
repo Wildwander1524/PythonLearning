@@ -125,18 +125,24 @@ day0X_topic/
 
 ---
 
-## 5b · Upgrade Path — Markdown → interactive HTML
+## 5b · Lesson format — the video-teacher and the textbook (updated 2026-06-27)
 
-Any stable lesson can be upgraded to interactive HTML via `/teach` — ask Claude to upgrade
-after `RECALL.md` is marked complete.
+Each day is built **interactive-HTML-first**. Think of `LESSON.interactive.html` as **a teacher
+explaining by video**: it's where you go *deeper* and understand *faster*, so it's authored first
+and is the primary lesson. `LESSON.bilingual.md` is **the textbook** beside the lecture — a reference
+to consult, authored second. (This reverses the old "markdown first, HTML-after-recall" order.)
 
-The Markdown lesson remains the source of truth; the HTML is a richer, browser-interactive
-rendering (live quizzes + instant feedback) worth generating *once the content has settled
-and you've proven retention* on that day's `RECALL.md`. Upgrading earlier just means
-re-generating when the text changes.
+Because the interactive lesson now leads, it can't be something you only *watch* — passive watching
+feels like learning but skips the retrieval that builds memory. So the HTML **embeds the feedback loop
+itself**: *predict-before-reveal* prompts (you commit an answer before it's shown) and at least one
+*quiz with instant feedback*. The cold, spaced re-tests still live **outside** the lesson — in
+`RECALL.md` and `review-queue.md` — done from memory the next morning.
 
-> 🔔 **Reminder behavior:** when you finish reviewing or mark a day's `RECALL.md` complete,
-> Claude will remind you that this now-stable lesson can be `/teach`-upgraded to HTML.
+Every concept is taught to a **density floor**: three escalating depth passes (intuition → mechanism →
+edge cases) and three worked examples, easy → hard.
+
+> 🔔 **Reminder behavior:** new days lead with the interactive HTML (no "upgrade after RECALL" step).
+> The after-recall upgrade prompt only applies to *legacy text-only* lessons that predate this change.
 
 ---
 
