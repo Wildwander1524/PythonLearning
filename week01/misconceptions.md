@@ -98,6 +98,12 @@
 - Correct: `__exit__` runs **guaranteed** — success *or* error, like `finally` — for cleanup; suppression
   is opt-in via `return True`. And `as` binds whatever `__enter__` *returns*, not the manager itself.
 
+**M18 · "Use `x or default` (or `bool(x)`) to fill in a missing argument."**  ⟶ E4  *(surfaced 2026-06-29 — logkit `allowed_levels`)*
+- Counter: `def f(items=None): items = items or []` silently replaces an explicit **empty** `[]`/`set()`/`0`/`""`.
+  `FileLogger(allowed_levels=set())` ("allow nothing") gets clobbered into the full default set.
+- Correct: the None-sentinel asks **one literal question** — `items if items is not None else default`.
+  `or`/`bool()` ask "is it *truthy*?", a different (wrong) question that mishandles falsy-but-valid values.
+
 ---
 > When a new day's topic lands, add its 2–4 classic traps here *before* writing that day's RECALL,
 > so the questions can include the trap as a distractor.
