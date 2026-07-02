@@ -3,9 +3,9 @@
 - **Owner:** Career-changer (science/engineering background, 9 yrs since graduation, strong engineering thinking, no prior programming work experience)
 - **Target role:** Industrial large-model (大模型) fine-tuning + Agent development
 - **Geography:** Phase 1 — China first-tier cities (Beijing / Shanghai / Guangzhou / Shenzhen); Phase 2 (long-term) — Germany, related field
-- **Plan window:** 2026-06-16 → 2026-09-12 (13 weeks; Week 1 starts Monday 2026-06-16)
+- **Plan window:** 2026-06-16 → 2026-10-03 (16 weeks — extended from 13 on 2026-07-01, see §0c; Week 1 starts Monday 2026-06-16)
 - **Cadence:** 6 days/week (Mon–Sat), Sunday off. **Default target now = 6 h focused learning + 2 h project/application buffer/day**; 10 h/day is an optional sprint ceiling, not the baseline.
-- **Created:** 2026-06-15  | **Last updated:** 2026-06-26  | **Status:** 🟢 Active — recalibrated to a portfolio-first plan; Week 1 Day 5 homework pending
+- **Created:** 2026-06-15  | **Last updated:** 2026-07-01  | **Status:** 🟢 Active — re-graded to 16 weeks + hardware-grounded (§0c); Week 1 Day 5 homework pending
 
 > This file is BOTH the study plan AND the live progress record. As you complete exercises,
 > send them to me and I update the tracking table + completion log below. See **§7 Default
@@ -64,6 +64,111 @@ material, but future expansion should follow the project gates above.
 
 ---
 
+## §0b — 2026-07-01 Fact-Check Addendum (independent web re-verification of §0)
+
+The 2026-06-26 recalibration (§0, done with CODEX) was independently re-verified via live web search on
+2026-07-01. **Verdict: holds up well.** Three of four load-bearing claims corroborate cleanly; one figure
+needs softening; one framework name needs to be more specific. No claim was contradicted.
+
+1. **Germany manufacturing > automotive ranking — keep the ranking, soften the numbers.** The
+   "$2.14B→$10.5B, 35.8% CAGR" manufacturing figure (§1 Q1 below) is repeated verbatim across multiple
+   market-research aggregator sites — a syndication pattern (single-source risk), not independent
+   triangulation. **Treat that specific dollar/CAGR figure as illustrative, not precise.** The *ranking*
+   itself is independently corroborated: automotive AI forecasts from a different source set show only
+   ~$1.4-1.6B by 2030 at 16-29% CAGR (smaller, slower than manufacturing's claim), and the 58.7%
+   industrial-AI-adoption figure is separately corroborated by the ifo Institute's 2026 survey
+   ([Deutschland in English](https://deutschlandinenglish.com/p/over-half-of-german-companies-adopt-ai-in-2026-driven-by-industry-and-large-enterprises)),
+   which independently tracks manufacturing AI use rising 17%→40%+ from 2023→2025.
+2. **China 大模型应用 job-market thesis — CORROBORATED, no change.** Current 2026 sources still describe
+   LangChain/LangGraph/LlamaIndex/CrewAI + RAG w/ vector DBs + PEFT/LoRA fine-tuning of open models as
+   baseline 大模型应用/Agent requirements, distinct from 基座 (foundation-model) roles. A 2026 career-advice
+   source states almost this plan's exact thesis independently.
+3. **Framework/ecosystem stability — CORROBORATED, one naming refinement.** No new framework has
+   overtaken vLLM/SGLang/TensorRT-LLM as the serving trio, and LoRA/QLoRA remain the dominant PEFT
+   approach (only incremental variants like DoRA/AdaLoRA exist). **Refinement:** LangGraph has become the
+   de facto agent-orchestration layer *within* LangChain (LangChain's own docs now default to LangGraph
+   constructs) — where this plan says plain "LangChain" for agent work (e.g. §1 Q2's general market note),
+   read it as **LangGraph specifically**; §3/§5's R11/P3 rows already name LangGraph explicitly and need
+   no change.
+4. **MATLAB/C++ deprioritization — CORROBORATED, no change.** Python remains dominant for 大模型应用/Agent
+   roles; C++ appears mainly in 算法/基座-track postings, not the application track this plan targets.
+
+**Digest-automation reliability (operational note, not a plan-content issue):** the Weekly AI Industry
+Digest cloud routine (`trig_01DCx7PTmKXrwbJnUu5Xr9Ym`, §7.2) produced **zero** digest entries across its
+first two scheduled Fridays (06-19, 06-26) despite being enabled with a correct cron schedule — most
+likely the GitHub-access prerequisite the routine's own setup note warns about was never satisfied. The
+learner reconnected GitHub access on 2026-07-01; the routine config now shows `updated_at: 2026-07-01`.
+A manual on-demand test-run was triggered the same day via the schedule API to verify the fix before
+waiting for the next natural Friday run (2026-07-03) — see this session's progress log
+(`progress/2026-07-01_HANDOFF.md` if still present, or the dated Completion-log entry below) for the
+test-run result. **If Digest #1 still hasn't appeared by 2026-07-04, the connection fix did not take —
+escalate at https://claude.ai/code/routines/trig_01DCx7PTmKXrwbJnUu5Xr9Ym rather than continuing to check
+manually.**
+
+---
+
+## §0c — 2026-07-01 Pace + Hardware Grounding Patch (grilled & decided with the learner)
+
+The plan was re-evaluated on 2026-07-01: strategy (§0) and evidence (§0b) stand, but two reality
+gaps remained — **measured pace** and **actual hardware**. Both are now closed. The five decisions
+below were settled via an explicit 5-question grilling; the learner accepted the recommended
+option on all five.
+
+### Pace evidence → 16-week window (Q1)
+Week 1 was scheduled for 6 days (06-16 → 06-21); as of 07-01 the D5 homework is still open —
+~2.5× the planned duration. Root cause: the deep `/teach` 4-file + bilingual format applied to
+*all* content, not just hard content. **Decision:** keep all four portfolio gates at full depth
+and extend the official window from 13 → 16 weeks (**new end: ~2026-10-03**). The deep `/teach`
+format is reserved for genuinely new territory (PyTorch, LoRA/PEFT, RAG/agents, serving); routine
+drill content (NumPy/pandas mechanics, review days) gets a lighter single-file treatment. §3's
+grid is re-dated accordingly; §7 rule 5 amended.
+
+### Hardware facts (verified 2026-07-01) → binding consequences
+GPU = **NVIDIA GTX 1660, 6 GB VRAM** (Turing TU116, compute capability 7.5, **no tensor cores**),
+driver 560.94. CUDA confirmed working in the `dl` conda env (torch 2.12.1+cu126,
+`torch.cuda.is_available() == True`).
+
+- **M2 compute (Q2):** develop the full QLoRA pipeline **locally on a ≤3B model** (Qwen3-1.7B
+  class — fits 6 GB in 4-bit); when the pipeline and eval harness are green, rent an **AutoDL
+  4090 for one 7B headline run** (~¥20–50 total). Colab is not the default (VPN dependency);
+  domestic AutoDL-class rental is.
+- **M4 serving (Q3):** vLLM/SGLang are Linux-only and no WSL2 Ubuntu distro exists yet (only
+  docker-desktop). **Install WSL2 Ubuntu when P3 starts (~late Aug)**, run the serving benchmark
+  there on a small model (CC 7.5 meets vLLM's floor), optionally re-run one config on AutoDL for
+  a big-GPU data point. This also delivers the plan's Linux/CLI-hygiene goal.
+- **TensorRT-LLM: demoted from "optional local stretch" to cloud-only stretch.** On a 6 GB
+  non-tensor-core card it is not a rational local target.
+
+### Environment policy (Q4) + 2026-07-01 audit result
+All work currently runs in conda `base`; the Week-1 `pythonlearning` env was never created.
+**Decision:** each portfolio project (M1–M3) becomes its **own `uv` project** (pyproject.toml +
+lockfile, `uv run pytest`, pyright) inside the PythonLearning repo; conda `base` stays for
+scratch/lesson notebooks; `dl`/`ml` envs stay unchanged for P2.
+
+Audit: **P1 needs zero installs.** base has numpy 2.3.5 / pandas 2.3.3 / pytest 8.4.2 / jupyter /
+matplotlib; CLIs pyright 1.1.411, ruff 0.12.0, black 25.9.0, uv 0.11.23, git 2.54 all present;
+VSCode Python/Pylance/Jupyter/Data Wrangler stack installed; `ml` has scikit-learn 1.9 ready for
+R5; `dl` has transformers 5.12.1 + peft 0.19.1 + accelerate but **lacks bitsandbytes, fastapi,
+uvicorn, datasets, evaluate** (gated below). No RAG stack exists anywhere yet (fine — gated).
+
+**Install-by gates:**
+
+| Action | Env | When |
+|---|---|---|
+| Scaffold M1 as uv project (pyproject, pytest, pyright) | new, in PythonLearning repo | first action of R2 |
+| `pip install bitsandbytes fastapi uvicorn datasets evaluate` | `dl` | before R7 |
+| AutoDL account + one 4090 test hour | cloud | before M2 headline run |
+| Create M3 uv project (langgraph, chromadb or faiss, llamaindex, ragas) | new | before R9 |
+| Install WSL2 Ubuntu + uv inside; vLLM at R13 | WSL2 | P3 start |
+
+### Job-search timing (Q5)
+Applications start **right after M2 ships (~early Sep)** — two shipped artifacts (data project +
+fine-tune/API) is a credible floor, and P3's RAG/agent work being *in progress* is itself
+interview material. Calibrate on non-first-choice companies first; save top targets for after M3.
+Portfolio polish (M4) must not gate the first applications. Recorded as §7 rule 8.
+
+---
+
 ## §1 — Strategic Q&A (answers to the LearningPlan brief)
 
 ### Q1. Is automotive Germany's highest-potential AI sector? + Top 10
@@ -74,6 +179,9 @@ large automotive firms), but **Industrial / Manufacturing AI (Industrie 4.0)** h
 ceiling and is where Germany holds *global* leadership. The German manufacturing-AI market is
 projected to grow from ~USD 2.14 B (2026) to ~USD 10.5 B (2030) at **~35.8 % CAGR**, and the
 industrial sector leads national AI adoption at **58.7 %**.
+> ⚠️ **2026-07-01 fact-check:** the $2.14B→$10.5B/35.8% CAGR figure is a syndicated market-research-farm
+> number repeated verbatim across sources (single-source risk) — treat it as illustrative, not precise.
+> The manufacturing > automotive *ranking* itself is independently corroborated (see §0b above).
 
 **Why this matters for you:** Your stated direction — *industrial* large-model fine-tuning + agents —
 maps directly onto Germany's strongest AI sector, not a side one. The same skill set (industrial
@@ -112,7 +220,8 @@ Treat **TensorRT-LLM, edge multimodal, and video understanding** as stretch/elec
 must not crowd out portfolio evidence.
 
 **General market note (both cities + base reality):** 2025–2026 大模型应用 roles cluster on:
-LangChain/LlamaIndex for Agent/RAG pipelines · PEFT (LoRA/QLoRA) fine-tuning of open models
+LangChain (in practice, **LangGraph** for agent orchestration — see §0b)/LlamaIndex for Agent/RAG
+pipelines · PEFT (LoRA/QLoRA) fine-tuning of open models
 (Llama 3.x, Qwen, Mistral) · RAG with vector DBs · production serving (vLLM/TensorRT-LLM) ·
 a portfolio project with real depth. "基座大模型" (pretraining) roles are few and demand
 top-985 / published-paper profiles; **大模型应用 is the realistic entry path** for you — this plan
@@ -154,14 +263,17 @@ Suggested clock: 08:30–10:30 (S1) · 10:45–12:45 (S2) · 14:00–15:00 (S3) 
 > **Calendar note (2026-06-26):** The learner is behind the original date grid because Week 1 is being
 > taught in a deeper `/teach` format. From here, the plan is **gate-based**: do not compress the
 > portfolio projects to preserve a calendar illusion. If a gate slips, move the target date.
+>
+> **Re-grid (2026-07-01):** the windows below are re-dated to the 16-week decision in §0c
+> (new end ~2026-10-03). Gates and content are unchanged.
 
 | Phase | Target window | Core learning | Math/stat focus | Frontier/production focus | Gate to pass |
 |-------|---------------|---------------|-----------------|---------------------------|--------------|
-| **Recovery + Week 1 close** | 06-26 → 06-29 | Finish W1 D5 homework + D6 consolidation; clean progress/status | LA I recap | None unless time remains | Day 5 homework graded; Day 6 mini-project scoped |
-| **P1 — Python/data foundation** | 06-30 → 07-19 | Python engineering, NumPy, pandas, notebooks/scripts, testing, Git | Linear algebra, derivatives, probability basics | Hugging Face orientation; embeddings/vector DB concepts | **M1 shipped:** real dataset analysis + README + tests/checks |
-| **P2 — ML/DL + fine-tune/deploy** | 07-20 → 08-15 | scikit-learn basics, PyTorch fundamentals, Transformers, PEFT/LoRA | Metrics, optimization, error analysis | FastAPI inference service; model cards; experiment logs | **M2 shipped:** LoRA fine-tune + evaluation + API |
-| **P3 — RAG + Agent core** | 08-17 → 09-05 | RAG pipeline, chunking/retrieval/reranking, tool-calling agents, LangGraph/LlamaIndex patterns | Retrieval metrics, faithfulness, latency/quality tradeoffs | RAGAS-style eval, tracing/logging, prompt/version control | **M3 shipped:** industrial-doc RAG + tool agent + eval report |
-| **P4 — Serving + portfolio polish** | 09-07 → 09-12 | Capstone integration, README/demo/resume bullets, mock interviews | Metrics consolidation | vLLM or SGLang benchmark; TensorRT-LLM optional stretch | **M4 shipped:** public portfolio package + interview script |
+| **Recovery + Week 1 close** | 07-01 → 07-05 | Finish W1 D5 homework + D6 consolidation; clean progress/status | LA I recap | None unless time remains | Day 5 homework graded; Day 6 mini-project scoped |
+| **P1 — Python/data foundation** | 07-06 → 08-01 | Python engineering, NumPy, pandas, notebooks/scripts, testing, Git | Linear algebra, derivatives, probability basics | Hugging Face orientation; embeddings/vector DB concepts | **M1 shipped:** real dataset analysis + README + tests/checks |
+| **P2 — ML/DL + fine-tune/deploy** | 08-03 → 08-29 | scikit-learn basics, PyTorch fundamentals, Transformers, PEFT/LoRA | Metrics, optimization, error analysis | FastAPI inference service; model cards; experiment logs | **M2 shipped:** LoRA fine-tune + evaluation + API |
+| **P3 — RAG + Agent core** | 08-31 → 09-26 | RAG pipeline, chunking/retrieval/reranking, tool-calling agents, LangGraph/LlamaIndex patterns | Retrieval metrics, faithfulness, latency/quality tradeoffs | RAGAS-style eval, tracing/logging, prompt/version control | **M3 shipped:** industrial-doc RAG + tool agent + eval report |
+| **P4 — Serving + portfolio polish** | 09-28 → 10-03 | Capstone integration, README/demo/resume bullets, mock interviews | Metrics consolidation | vLLM or SGLang benchmark; TensorRT-LLM optional stretch | **M4 shipped:** public portfolio package + interview script |
 
 ### Priority Stack After Recalibration
 
@@ -403,6 +515,33 @@ train/val/test, scikit-learn workflow.
 ### Completion log (newest first)
 *(Each time you send completed exercises, I append a dated entry here: what you did, what was
 correct, what to fix, and any pace adjustment.)*
+- **2026-07-01 (second session)** — **Plan re-graded to 16 weeks + hardware-grounded (§0c).**
+  Re-evaluated plan rationality and audited the actual environment against it, then grilled the
+  learner with 5 decisions (all recommendations accepted): **Q1** extend window 13 → 16 weeks
+  (end ~10-03), deep `/teach` format reserved for new territory; **Q2** M2 = local QLoRA on ≤3B +
+  one AutoDL 4090 7B headline run; **Q3** M4 = WSL2 Ubuntu at P3 start, TensorRT-LLM demoted to
+  cloud-only stretch; **Q4** each portfolio project = its own uv project (conda base stays for
+  scratch); **Q5** job applications start right after M2 ships. Hardware verified: GTX 1660 6 GB,
+  no tensor cores, CUDA working in `dl`. Environment audit: **P1 ready with zero installs**
+  (base env + pyright/ruff/uv CLIs + VSCode Python/Jupyter stack all healthy); remaining gaps
+  gated in §0c's install-by table (`dl` needs bitsandbytes/fastapi/datasets/evaluate before R7;
+  RAG stack before R9; WSL2 Ubuntu at P3 start). §3 re-dated; §7 rules 5 + 8 updated.
+- **2026-07-01** — **Independent web fact-check of the 2026-06-26 CODEX recalibration** (see new §0b).
+  Verdict: holds up well — 3/4 claims corroborated cleanly. Germany manufacturing-AI $2.14B→$10.5B/
+  35.8% CAGR figure flagged as syndicated/single-source and softened to "illustrative" (ranking itself
+  stays, independently corroborated); LangGraph named explicitly as the concrete agent-orchestration
+  framework where the plan said generic "LangChain" (§1 Q2). Also surfaced and addressed an operational
+  gap: the Weekly AI Industry Digest routine had produced zero entries across its first two scheduled
+  Fridays (06-19, 06-26) — root cause was the GitHub-access prerequisite never being satisfied. Learner
+  reconnected GitHub same day; routine config confirmed updated; a manual test-run was triggered via the
+  schedule API to verify before the next natural Friday run (2026-07-03) rather than waiting and checking
+  manually again. Also this session: fixed real "3 escalating depth passes + 3 worked examples" gaps in
+  Week 2 Day 1/2 lesson materials (view-vs-copy had zero depth passes; the promised 3×3 determinant
+  example didn't exist anywhere; Day 2's vectorization/np.where/inverse sections had only 1 example each)
+  and retrofitted both days' SOLUTIONS.bilingual.md to the Day-5-walkthrough explanation standard
+  (3-pass reasoning + inline citations) plus answered the two previously-unanswered stretch challenges
+  (`det2x2`, `pairwise_sq_dists`) — all pyright-clean and numerically verified. Detail →
+  `progress/2026-07-01_HANDOFF.md`.
 - **2026-06-26** — **3-month plan evaluated and recalibrated.** Updated the plan from a
   subject-tour schedule into a portfolio-first roadmap with four gates: **M1 data project → M2
   LoRA fine-tune + API → M3 industrial RAG + tool agent → M4 serving benchmark + portfolio polish**.
@@ -451,6 +590,14 @@ These are now the permanent operating rules for this study plan. They apply ever
      - ⚠️ **Prerequisite:** the cloud agent needs GitHub access to this repo. If digests don't appear,
        connect GitHub via `/web-setup` or install the Claude GitHub App, then re-run the routine from
        the link above.
+     - **2026-07-01 update:** confirmed zero digests had appeared through two scheduled Fridays
+       (06-19, 06-26) — this prerequisite likely wasn't satisfied. Learner reconnected GitHub access;
+       routine config `updated_at` now shows 2026-07-01. A manual test-run was triggered the same day
+       (see §0b / Completion log) instead of waiting for 2026-07-03 to find out. **Permanent fix for
+       "don't want to check again and again":** once a Slack or Email MCP connector is attached
+       (learner to connect at https://claude.ai/customize/connectors when convenient), the routine can
+       be updated to always send a one-line success/failure notification after each run — closing the
+       loop so no manual `git fetch` checking is ever needed again.
 
 3. **Record discipline.** This file stays the single source of truth for the plan + progress. I keep
    §3–§5 aligned with reality as your pace shifts, and I never silently drop a subject — deferrals are
@@ -469,6 +616,10 @@ These are now the permanent operating rules for this study plan. They apply ever
      **`SOLUTIONS.md`**.
    - Pedagogy spine = **retrieval practice + spaced/interleaved review + desirable difficulties**
      (*Make It Stick* / Bjork). Homework is **calibrated to the learner's demonstrated growth edges**.
+   - **2026-07-01 refinement (§0c Q1):** the full 4-file deep format is reserved for genuinely
+     new territory (PyTorch, LoRA/PEFT, RAG/agents, serving). Routine drill content (NumPy/pandas
+     mechanics, review/consolidation days) uses a lighter single-file lesson; rule 6's bilingual
+     pass then applies to whichever files exist.
 
 6. **Bilingual workflow.** Author the **complete English** materials first, then pass each through
    **DeepSeek** to produce EN-ZH **`*.bilingual.md`** files *alongside* the English originals — for
@@ -482,6 +633,10 @@ These are now the permanent operating rules for this study plan. They apply ever
    checks, README, failure/error-analysis log, evaluation notes, and 3-5 resume/interview bullets.
    If schedule pressure appears, defer lower-priority topics (TensorRT-LLM, edge multimodal, video,
    C++ reading) rather than reducing project evidence.
+
+8. **Job-search timing (adopted 2026-07-01, §0c Q5).** Applications begin **right after M2
+   ships** (~early Sep target): calibrate on non-first-choice companies first, save top targets
+   for after M3. Portfolio polish (M4) must not gate the first applications.
 
 ---
 
